@@ -22,7 +22,7 @@ const char* com_exception::what() const
 HRESULT throw_on_error(HRESULT hr, const char* what_arg)
 {
 	if (SUCCEEDED(hr)) return hr;
-	ostringstream what(what_arg);
-	what << " hr = " << hr;
+	ostringstream what;
+	what << "hr = " << hr << " in " << what_arg;
 	throw com_exception(what.str(), hr);
 }

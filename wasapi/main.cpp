@@ -42,14 +42,14 @@ int wmain(int argc, wchar_t** argv)
 		HR(graphBuilder->AddFilter(filter, L"Wasapi"));
 
 		CComPtr<IPin> pin2;
-		HR(filter->FindPin(L"Capture", &pin2));
+		HR(filter->FindPin(L"Capture", NULL));
 		HR(graphBuilder->Render(pin2));
 		
 		CComPtr<IMediaControl> control;
 		HR(graphBuilder.QueryInterface(&control));
 		HR(control->Run());
 	}
-	catch (exception e)
+	catch (const exception& e)
 	{
 		wcout << e.what() << endl;
 	}
