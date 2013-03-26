@@ -3,102 +3,48 @@
 #include "com_exception.h"
 #include "CoInitializer.h"
 #include "DeviceEnumerator.h"
+#include "Graph.h"
 
+using namespace DirectShow;
 using namespace std;
+using namespace WASAPI;
 
 HRESULT AddToRot(IUnknown *pUnkGraph, DWORD *pdwRegister);
+void DumpGraph(IFilterGraph* graph);
+void Main(const args_vector& args);
 void RemoveFromRot(DWORD pdwRegister);
 
 int wmain(int argc, wchar_t** argv)
 {
-	DWORD reg = 0;
 	try
 	{
-		args_vector args(argc, argv);
-		CoInitializer coinit(COINIT_MULTITHREADED);
-		DeviceEnumerator enumerator;
-		Device device = enumerator.GetDefaultDevice(eCapture, eMultimedia);
-		CComPtr<IBaseFilter> filter = device.GetBaseFilter();
-
-		FILTER_INFO filterInfo;
-		HR(filter->QueryFilterInfo(&filterInfo));
-		wcout << filterInfo.achName << endl;
-
-		{
-			CComPtr<IEnumPins> enumPins;
-			HR(filter->EnumPins(&enumPins));
-			for (CComPtr<IPin> pin; enumPins->Next(1, &pin, NULL) == S_OK; pin.Release())
-			{
-				PIN_INFO pinInfo;
-				HR(pin->QueryPinInfo(&pinInfo));
-				wcout << (pinInfo.dir == PINDIR_INPUT ? "in: " : "out: ") << pinInfo.achName << endl;
-			}
-		}
-
-		CComPtr<IGraphBuilder> graphBuilder;
-		HR(CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (LPVOID*)&graphBuilder));
-		HR(AddToRot(graphBuilder, &reg));
-
-		HR(graphBuilder->AddFilter(filter, L"Wasapi"));
-
-		CComPtr<IPin> pin2;
-		HR(filter->FindPin(L"Capture", NULL));
-		HR(graphBuilder->Render(pin2));
-		
-		CComPtr<IMediaControl> control;
-		HR(graphBuilder.QueryInterface(&control));
-		HR(control->Run());
+		Main(args_vector(argc, argv));
 	}
-	catch (const exception& e)
+	catch (const exception& ex)
 	{
-		wcout << e.what() << endl;
-	}
+		wcout << ex.what() << endl;
 #ifdef _DEBUG
 	WCHAR dummy;
 	wcin.getline(&dummy, 1);
 #endif
-	RemoveFromRot(reg);
+		return 1;
+	}
 	return 0;
 }
 
-HRESULT AddToRot(IUnknown *pUnkGraph, DWORD *pdwRegister) 
+void Main(const args_vector& args)
 {
-    IMoniker * pMoniker = NULL;
-    IRunningObjectTable *pROT = NULL;
+	CoInitializer coinit(COINIT_MULTITHREADED);
 
-    if (FAILED(GetRunningObjectTable(0, &pROT))) 
-    {
-        return E_FAIL;
-    }
-    
-    const size_t STRING_LENGTH = 256;
+	DeviceEnumerator wasapi;
+	Graph graph(CLSID_FilterGraph, true);
+	graph.AddFilter(wasapi.GetDefaultDevice(eCapture, eMultimedia).ToFilter(), L"in");
+	graph.AddFilter(wasapi.GetDefaultDevice(eRender, eMultimedia).ToFilter(), L"out");
+	graph.Connect(graph[L"in"][L"Capture"], graph[L"out"][L"Audio Input pin (rendered)"]);
+	graph.Run();
 
-    WCHAR wsz[STRING_LENGTH];
- 
-   StringCchPrintfW(
-        wsz, STRING_LENGTH, 
-        L"FilterGraph %08x pid %08x", 
-        (DWORD_PTR)pUnkGraph, 
-        GetCurrentProcessId()
-        );
-    
-    HRESULT hr = CreateItemMoniker(L"!", wsz, &pMoniker);
-    if (SUCCEEDED(hr)) 
-    {
-        hr = pROT->Register(ROTFLAGS_REGISTRATIONKEEPSALIVE, pUnkGraph,
-            pMoniker, pdwRegister);
-        pMoniker->Release();
-    }
-    pROT->Release();
-    
-    return hr;
-}
+	wcout << graph.ToString();
 
-void RemoveFromRot(DWORD pdwRegister)
-{
-    IRunningObjectTable *pROT;
-    if (SUCCEEDED(GetRunningObjectTable(0, &pROT))) {
-        pROT->Revoke(pdwRegister);
-        pROT->Release();
-    }
+	WCHAR dummy;
+	wcin.getline(&dummy, 1);
 }

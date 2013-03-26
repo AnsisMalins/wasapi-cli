@@ -3,22 +3,29 @@
 #include "com_exception.h"
 
 using namespace std;
+using namespace WASAPI;
 
 DeviceEnumerator::DeviceEnumerator()
 {
-	HR(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator), (LPVOID*)&base));
+	HR(deviceEnumerator.CoCreateInstance(
+		__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER));
 }
 
 Device DeviceEnumerator::GetDefaultDevice(EDataFlow dataFlow, ERole role) const
 {
-	CComPtr<IMMDevice> device;
-	HR(base->GetDefaultAudioEndpoint(dataFlow, role, &device));
-	return Device(device);
+	CComPtr<IMMDevice> ptr;
+	HR(deviceEnumerator->GetDefaultAudioEndpoint(dataFlow, role, &ptr));
+	return Device(ptr);
 }
 
-Device DeviceEnumerator::GetDevice(const wstring& id) const
+Device DeviceEnumerator::GetDevice(LPCWSTR id) const
 {
-	CComPtr<IMMDevice> device;
-	HR(base->GetDevice(id.c_str(), &device));
-	return Device(device);
+	CComPtr<IMMDevice> ptr;
+	HR(deviceEnumerator->GetDevice(id, &ptr));
+	return Device(ptr);
+}
+
+DeviceEnumerator::operator IMMDeviceEnumerator *() const
+{
+	return deviceEnumerator;
 }

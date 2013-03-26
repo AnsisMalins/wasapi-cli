@@ -2,14 +2,22 @@
 #include "Device.h"
 #include "com_exception.h"
 
-Device::Device(const CComPtr<IMMDevice>& device) :
-	base(device)
+using namespace DirectShow;
+using namespace WASAPI;
+
+Device::Device(IMMDevice* ptr) :
+	device(ptr)
 {
 }
 
-CComPtr<IBaseFilter> Device::GetBaseFilter() const
+Filter Device::ToFilter() const
 {
-	CComPtr<IBaseFilter> baseFilter;
-	HR(base->Activate(IID_IBaseFilter, CLSCTX_ALL, NULL, (void**)&baseFilter));
-	return baseFilter;
+	CComPtr<IBaseFilter> ptr;
+	HR(device->Activate(IID_IBaseFilter, CLSCTX_ALL, NULL, (void**)&ptr));
+	return Filter(ptr);
+}
+
+Device::operator IMMDevice*() const
+{
+	return device;
 }

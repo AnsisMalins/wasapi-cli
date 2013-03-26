@@ -4,7 +4,7 @@
 
 CoInitializer::CoInitializer(DWORD dwCoInit)
 {
-	HR(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+	HR(CoInitializeEx(NULL, dwCoInit));
 }
 
 CoInitializer::~CoInitializer()

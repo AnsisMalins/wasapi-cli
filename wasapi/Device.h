@@ -1,10 +1,15 @@
 #pragma once
+#include "Filter.h"
 
-class Device
+namespace WASAPI
 {
-public:
-	Device(const CComPtr<IMMDevice>& device);
-	CComPtr<IBaseFilter> GetBaseFilter() const;
-private:
-	CComPtr<IMMDevice> base;
-};
+	class Device
+	{
+	public:
+		Device(IMMDevice* ptr);
+		DirectShow::Filter ToFilter() const;
+		operator IMMDevice*() const;
+	private:
+		CComPtr<IMMDevice> device;
+	};
+}

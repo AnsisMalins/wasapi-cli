@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <atlbase.h>
+#include <objbase.h>
 
 #include <dshow.h>
 
