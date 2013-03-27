@@ -21,19 +21,35 @@ Filter::Filter(IBaseFilter* ptr) :
 {
 }
 
-Pin Filter::FindPin(LPCWSTR name) const
+Pin Filter::FindPin(LPCWSTR name)
 {
 	CComPtr<IPin> ptr;
 	HR(baseFilter->FindPin(name, &ptr));
 	return Pin(ptr);
 }
 
-Filter::operator IBaseFilter*() const
+const Pin Filter::FindPin(LPCWSTR name) const
+{
+	Pin result = FindPin(name);
+	return result;
+}
+
+Filter::operator IBaseFilter*()
 {
 	return baseFilter;
 }
 
-Pin Filter::operator [](LPCWSTR name) const
+Filter::operator const IBaseFilter*() const
+{
+	return baseFilter;
+}
+
+Pin Filter::operator [](LPCWSTR name)
+{
+	return FindPin(name);
+}
+
+const Pin Filter::operator [](LPCWSTR name) const
 {
 	return FindPin(name);
 }

@@ -6,7 +6,14 @@ namespace DirectShow
 	{
 	public:
 		Pin(IPin* ptr);
-		operator IPin*() const;
+		void Connect(Pin& receivePin);
+		Pin ConnectedTo();
+		const Pin ConnectedTo() const;
+		void Disconnect();
+		PIN_DIRECTION QueryDirection() const;
+		std::wstring QueryId() const;
+		operator IPin*();
+		operator const IPin*() const;
 	private:
 		CComPtr<IPin> pin;
 	};

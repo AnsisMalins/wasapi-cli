@@ -23,7 +23,7 @@ Graph::~Graph()
 	if (graphBuilder.p->Release() <= 1) RemoveFromRot(rotEntry);
 }
 
-void Graph::AddFilter(Filter& filter, LPCWSTR name)
+void Graph::AddFilter(Filter filter, LPCWSTR name)
 {
 	HR(graphBuilder->AddFilter(filter, name));
 }
@@ -35,26 +35,32 @@ Filter Graph::AddSourceFilter(LPCWSTR fileName, LPCWSTR filterName)
 	return Filter(ptr);
 }
 
-void Graph::Connect(Pin& pinOut, Pin& pinIn)
+void Graph::Connect(Pin pinOut, Pin pinIn)
 {
 	HR(graphBuilder->Connect(pinOut, pinIn));
 }
 
-void Graph::ConnectDirect(Pin& pinOut, Pin& pinIn)
+void Graph::ConnectDirect(Pin pinOut, Pin pinIn)
 {
 	HR(graphBuilder->ConnectDirect(pinOut, pinIn, NULL));
 }
 
-void Graph::Disconnect(Pin& pin)
+void Graph::Disconnect(Pin pin)
 {
 	HR(graphBuilder->Disconnect(pin));
 }
 
-Filter Graph::FindFilter(LPCWSTR name) const
+Filter Graph::FindFilter(LPCWSTR name)
 {
 	CComPtr<IBaseFilter> ptr;
 	HR(graphBuilder->FindFilterByName(name, &ptr));
 	return Filter(ptr);
+}
+
+const Filter Graph::FindFilter(LPCWSTR name) const
+{
+	Filter result = FindFilter(name);
+	return result;
 }
 
 void Graph::Pause()
@@ -62,17 +68,17 @@ void Graph::Pause()
 	HR(mediaControl->Pause());
 }
 
-void Graph::Reconnect(Pin& pin)
+void Graph::Reconnect(Pin pin)
 {
 	HR(graphBuilder->Reconnect(pin));
 }
 
-void Graph::RemoveFilter(Filter& filter)
+void Graph::RemoveFilter(Filter filter)
 {
 	HR(graphBuilder->RemoveFilter(filter));
 }
 
-void Graph::Render(Pin& pin)
+void Graph::Render(Pin pin)
 {
 	HR(graphBuilder->Render(pin));
 }
@@ -130,7 +136,12 @@ wstring Graph::ToString() const
 	return result.str();
 }
 
-Filter Graph::operator [](LPCWSTR name) const
+Filter Graph::operator [](LPCWSTR name)
+{
+	return FindFilter(name);
+}
+
+const Filter Graph::operator [](LPCWSTR name) const
 {
 	return FindFilter(name);
 }
