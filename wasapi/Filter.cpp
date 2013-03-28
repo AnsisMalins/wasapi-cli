@@ -3,6 +3,7 @@
 #include "com_exception.h"
 
 using namespace DirectShow;
+using namespace std;
 
 Filter::Filter(const IID& clsid)
 {
@@ -30,8 +31,19 @@ Pin Filter::FindPin(LPCWSTR name)
 
 const Pin Filter::FindPin(LPCWSTR name) const
 {
-	Pin result = FindPin(name);
-	return result;
+	CComPtr<IPin> ptr;
+	HR(baseFilter->FindPin(name, &ptr));
+	return Pin(ptr);
+}
+
+Pin Filter::FindPin(const wstring& name)
+{
+	return FindPin(name.c_str());
+}
+
+const Pin Filter::FindPin(const wstring& name) const
+{
+	return FindPin(name.c_str());
 }
 
 Filter::operator IBaseFilter*()
@@ -52,4 +64,14 @@ Pin Filter::operator [](LPCWSTR name)
 const Pin Filter::operator [](LPCWSTR name) const
 {
 	return FindPin(name);
+}
+
+Pin Filter::operator [](const wstring& name)
+{
+	return FindPin(name.c_str());
+}
+
+const Pin Filter::operator [](const wstring& name) const
+{
+	return FindPin(name.c_str());
 }

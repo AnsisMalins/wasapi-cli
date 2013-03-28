@@ -11,6 +11,13 @@ DeviceEnumerator::DeviceEnumerator()
 		__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER));
 }
 
+DeviceCollection DeviceEnumerator::EnumDevices(EDataFlow dataFlow, DWORD stateMask) const
+{
+	CComPtr<IMMDeviceCollection> ptr;
+	HR(deviceEnumerator->EnumAudioEndpoints(dataFlow, stateMask, &ptr));
+	return DeviceCollection(ptr);
+}
+
 Device DeviceEnumerator::GetDefaultDevice(EDataFlow dataFlow, ERole role) const
 {
 	CComPtr<IMMDevice> ptr;
@@ -25,7 +32,12 @@ Device DeviceEnumerator::GetDevice(LPCWSTR id) const
 	return Device(ptr);
 }
 
-DeviceEnumerator::operator IMMDeviceEnumerator *() const
+DeviceEnumerator::operator IMMDeviceEnumerator *()
+{
+	return deviceEnumerator;
+}
+
+DeviceEnumerator::operator const IMMDeviceEnumerator *() const
 {
 	return deviceEnumerator;
 }

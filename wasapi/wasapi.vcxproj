@@ -95,12 +95,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbasd.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,12 +118,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbasd.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,14 +138,16 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbase.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -157,18 +163,20 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbase.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="args_vector.cpp" />
+    <ClCompile Include="DeviceCollection.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="CoInitializer.cpp" />
     <ClCompile Include="com_exception.cpp" />
@@ -177,15 +185,17 @@
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pin.cpp" />
+    <ClCompile Include="PropertyStore.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StdoutRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="args_vector.h" />
+    <ClInclude Include="DeviceCollection.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="CoInitializer.h" />
     <ClInclude Include="com_exception.h" />
@@ -193,7 +203,9 @@
     <ClInclude Include="DeviceEnumerator.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Pin.h" />
+    <ClInclude Include="PropertyStore.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StdoutRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\baseclasses\baseclasses.vcxproj">

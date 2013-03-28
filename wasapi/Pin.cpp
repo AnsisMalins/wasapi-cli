@@ -24,8 +24,9 @@ Pin Pin::ConnectedTo()
 
 const Pin Pin::ConnectedTo() const
 {
-	Pin result = ConnectedTo();
-	return result;
+	CComPtr<IPin> ptr;
+	HR(pin->ConnectedTo(&ptr));
+	return Pin(ptr);
 }
 
 void Pin::Disconnect()

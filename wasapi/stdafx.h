@@ -5,21 +5,29 @@
 #define WIN32_LEAN_AND_MEAN
 #define WINVER 0x0600
 
+//baseclasses
+#include <streams.h>
+
+// COM
+#include <atlbase.h>
+#include <objbase.h>
+
+// DirectShow
+#include <dshow.h>
+
+// STL
 #include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <atlbase.h>
-#include <objbase.h>
-
-#include <dshow.h>
-
+// WASAPI
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+// Windows IO
 #include <fcntl.h>
 #include <io.h>
 

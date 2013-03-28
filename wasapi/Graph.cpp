@@ -59,8 +59,9 @@ Filter Graph::FindFilter(LPCWSTR name)
 
 const Filter Graph::FindFilter(LPCWSTR name) const
 {
-	Filter result = FindFilter(name);
-	return result;
+	CComPtr<IBaseFilter> ptr;
+	HR(graphBuilder->FindFilterByName(name, &ptr));
+	return Filter(ptr);
 }
 
 void Graph::Pause()
