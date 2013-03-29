@@ -8,17 +8,15 @@ namespace DirectShow
 	public:
 		Filter(const IID& clsid);
 		Filter(LPCOLESTR clsid);
+		Filter(const std::wstring& clsid);
 		Filter(IBaseFilter* ptr);
 		Pin FindPin(LPCWSTR name);
-		const Pin FindPin(LPCWSTR name) const;
 		Pin FindPin(const std::wstring& name);
-		const Pin FindPin(const std::wstring& name) const;
 		operator IBaseFilter*();
 		operator const IBaseFilter*() const;
+		//Pin operator[](unsigned int index);
 		Pin operator[](LPCWSTR name);
-		const Pin operator [](LPCWSTR name) const;
 		Pin operator[](const std::wstring& name);
-		const Pin operator [](const std::wstring& name) const;
 	private:
 		CComPtr<IBaseFilter> baseFilter;
 	};

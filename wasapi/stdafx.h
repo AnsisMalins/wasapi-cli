@@ -10,12 +10,12 @@
 
 // COM
 #include <atlbase.h>
-#include <objbase.h>
 
 // DirectShow
 #include <dshow.h>
 
 // STL
+#include <csignal>
 #include <exception>
 #include <iostream>
 #include <sstream>

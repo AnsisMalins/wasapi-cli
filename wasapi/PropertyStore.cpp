@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "PropertyStore.h"
 #include "com_exception.h"
-#include <memory>
 
 using namespace WASAPI;
 
@@ -32,14 +31,15 @@ DWORD PropertyStore::GetCount() const
 PROPVARIANT PropertyStore::GetValue(REFPROPERTYKEY key) const
 {
 	PROPVARIANT result;
+	PropVariantInit(&result);
 	HR(propertyStore->GetValue(key, &result));
 	return result;
 }
 
-void PropertyStore::SetValue(REFPROPERTYKEY key, REFPROPVARIANT value)
+/*void PropertyStore::SetValue(REFPROPERTYKEY key, REFPROPVARIANT value)
 {
 	HR(propertyStore->SetValue(key, value));
-}
+}*/
 
 PropertyStore::operator IPropertyStore *()
 {

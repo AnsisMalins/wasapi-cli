@@ -11,6 +11,7 @@ namespace WASAPI
 		DeviceCollection EnumDevices(EDataFlow dataFlow, DWORD stateMask) const;
 		Device GetDefaultDevice(EDataFlow dataFlow, ERole role) const;
 		Device GetDevice(LPCWSTR id) const;
+		Device GetDevice(const std::wstring& id) const;
 		operator IMMDeviceEnumerator*();
 		operator const IMMDeviceEnumerator*() const;
 	private:

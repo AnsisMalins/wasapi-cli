@@ -8,5 +8,9 @@ namespace DirectShow
 		StdoutRenderer(HRESULT* phr);
 		HRESULT CheckMediaType(const CMediaType* pmt);
 		HRESULT DoRenderSample(IMediaSample* pMediaSample);
+		HRESULT OnStartStreaming();
+		HRESULT OnStopStreaming();
+	private:
+		int stdoutMode;
 	};
 }

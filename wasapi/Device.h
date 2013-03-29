@@ -10,7 +10,7 @@ namespace WASAPI
 		Device(IMMDevice* ptr);
 		std::wstring GetId() const;
 		DWORD GetState() const;
-		const PropertyStore OpenPropertyStore() const;
+		PropertyStore OpenPropertyStore() const;
 		DirectShow::Filter ToFilter() const;
 		operator IMMDevice*();
 		operator const IMMDevice*() const;

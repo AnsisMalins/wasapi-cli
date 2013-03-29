@@ -32,6 +32,11 @@ Device DeviceEnumerator::GetDevice(LPCWSTR id) const
 	return Device(ptr);
 }
 
+Device DeviceEnumerator::GetDevice(const wstring& id) const
+{
+	return GetDevice(id.c_str());
+}
+
 DeviceEnumerator::operator IMMDeviceEnumerator *()
 {
 	return deviceEnumerator;

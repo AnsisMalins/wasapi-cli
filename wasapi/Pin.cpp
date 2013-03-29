@@ -22,11 +22,11 @@ Pin Pin::ConnectedTo()
 	return Pin(ptr);
 }
 
-const Pin Pin::ConnectedTo() const
+AM_MEDIA_TYPE Pin::ConnectionMediaType() const
 {
-	CComPtr<IPin> ptr;
-	HR(pin->ConnectedTo(&ptr));
-	return Pin(ptr);
+	AM_MEDIA_TYPE result;
+	HR(pin->ConnectionMediaType(&result));
+	return result;
 }
 
 void Pin::Disconnect()

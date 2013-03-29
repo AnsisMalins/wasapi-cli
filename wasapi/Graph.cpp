@@ -14,6 +14,7 @@ Graph::Graph(const IID& clsid, bool addToRot) :
 	HR(graphBuilder.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
 	if (addToRot) HR(AddToRot(graphBuilder, &rotEntry));
 	HR(graphBuilder.QueryInterface(&mediaControl));
+	HR(graphBuilder.QueryInterface(&mediaEvent));
 }
 
 Graph::~Graph()
@@ -23,9 +24,19 @@ Graph::~Graph()
 	if (graphBuilder.p->Release() <= 1) RemoveFromRot(rotEntry);
 }
 
-void Graph::AddFilter(Filter filter, LPCWSTR name)
+void Graph::Abort()
+{
+	HR(graphBuilder->Abort());
+}
+
+void Graph::AddFilter(Filter& filter, LPCWSTR name)
 {
 	HR(graphBuilder->AddFilter(filter, name));
+}
+
+void Graph::AddFilter(Filter& filter, const wstring& name)
+{
+	AddFilter(filter, name.c_str());
 }
 
 Filter Graph::AddSourceFilter(LPCWSTR fileName, LPCWSTR filterName)
@@ -35,19 +46,50 @@ Filter Graph::AddSourceFilter(LPCWSTR fileName, LPCWSTR filterName)
 	return Filter(ptr);
 }
 
-void Graph::Connect(Pin pinOut, Pin pinIn)
+Filter Graph::AddSourceFilter(LPCWSTR fileName, const wstring& filterName)
+{
+	return AddSourceFilter(fileName, filterName.c_str());
+}
+
+Filter Graph::AddSourceFilter(const wstring& fileName, LPCWSTR filterName)
+{
+	return AddSourceFilter(fileName.c_str(), filterName);
+}
+
+Filter Graph::AddSourceFilter(const wstring& fileName, const wstring& filterName)
+{
+	return AddSourceFilter(fileName.c_str(), filterName.c_str());
+}
+
+void Graph::Connect(Pin& pinOut, Pin& pinIn)
 {
 	HR(graphBuilder->Connect(pinOut, pinIn));
 }
 
-void Graph::ConnectDirect(Pin pinOut, Pin pinIn)
+void Graph::ConnectDirect(Pin& pinOut, Pin& pinIn)
 {
 	HR(graphBuilder->ConnectDirect(pinOut, pinIn, NULL));
 }
 
-void Graph::Disconnect(Pin pin)
+void Graph::Disconnect(Pin& pin)
 {
 	HR(graphBuilder->Disconnect(pin));
+}
+
+long Graph::GetEvent()
+{
+	long result;
+	LONG_PTR param1, param2;
+	HR(mediaEvent->GetEvent(&result, &param1, &param2, INFINITE));
+	HR(mediaEvent->FreeEventParams(result, param1, param2));
+	return result;
+}
+
+HANDLE Graph::GetEventHandle() const
+{
+	HANDLE result;
+	HR(mediaEvent->GetEventHandle((OAEVENT*)&result));
+	return result;
 }
 
 Filter Graph::FindFilter(LPCWSTR name)
@@ -57,11 +99,9 @@ Filter Graph::FindFilter(LPCWSTR name)
 	return Filter(ptr);
 }
 
-const Filter Graph::FindFilter(LPCWSTR name) const
+Filter Graph::FindFilter(const wstring& name)
 {
-	CComPtr<IBaseFilter> ptr;
-	HR(graphBuilder->FindFilterByName(name, &ptr));
-	return Filter(ptr);
+	return FindFilter(name.c_str());
 }
 
 void Graph::Pause()
@@ -69,17 +109,17 @@ void Graph::Pause()
 	HR(mediaControl->Pause());
 }
 
-void Graph::Reconnect(Pin pin)
+void Graph::Reconnect(Pin& pin)
 {
 	HR(graphBuilder->Reconnect(pin));
 }
 
-void Graph::RemoveFilter(Filter filter)
+void Graph::RemoveFilter(Filter& filter)
 {
 	HR(graphBuilder->RemoveFilter(filter));
 }
 
-void Graph::Render(Pin pin)
+void Graph::Render(Pin& pin)
 {
 	HR(graphBuilder->Render(pin));
 }
@@ -87,6 +127,11 @@ void Graph::Render(Pin pin)
 void Graph::RenderFile(LPCWSTR fileName)
 {
 	HR(graphBuilder->RenderFile(fileName, NULL));
+}
+
+void Graph::RenderFile(const wstring& fileName)
+{
+	RenderFile(fileName.c_str());
 }
 
 void Graph::Run()
@@ -120,7 +165,7 @@ wstring Graph::ToString() const
 		{
 			PIN_INFO pinInfo;
 			pin->QueryPinInfo(&pinInfo);
-			result << (pinInfo.dir == PINDIR_INPUT ? "<--" : "-->");
+			result << (pinInfo.dir == PINDIR_INPUT ? ">--" : "-->");
 			result << " " << pinInfo.achName;
 			CComPtr<IPin> connectedTo;
 			pin->ConnectedTo(&connectedTo);
@@ -128,8 +173,19 @@ wstring Graph::ToString() const
 			{
 				connectedTo->QueryPinInfo(&pinInfo);
 				pinInfo.pFilter->QueryFilterInfo(&filterInfo);
-				result << " -- " << pinInfo.achName;
-				result << " -- " << filterInfo.achName;
+				result << " --> " << pinInfo.achName;
+				result << " >-- " << filterInfo.achName;
+
+				AM_MEDIA_TYPE mt;
+				pin->ConnectionMediaType(&mt);
+				if (mt.subtype == MEDIASUBTYPE_PCM)
+				{
+					WAVEFORMATEX& fmt = *(WAVEFORMATEX*)mt.pbFormat;
+					result << endl << fmt.nChannels << " channels "
+						<< fmt.wBitsPerSample << " bits per sample "
+						<< fmt.nSamplesPerSec << " samples per second";
+				}
+				FreeMediaType(mt);
 			}
 			result << endl;
 		}
@@ -137,12 +193,39 @@ wstring Graph::ToString() const
 	return result.str();
 }
 
+long Graph::WaitForCompletion()
+{
+	long result;
+	HR(mediaEvent->WaitForCompletion(INFINITE, &result));
+	return result;
+}
+
+Graph::operator IGraphBuilder *()
+{
+	return graphBuilder;
+}
+
+Graph::operator const IGraphBuilder *() const
+{
+	return graphBuilder;
+}
+
+Graph::operator IMediaControl *()
+{
+	return mediaControl;
+}
+
+Graph::operator const IMediaControl *() const
+{
+	return mediaControl;
+}
+
 Filter Graph::operator [](LPCWSTR name)
 {
 	return FindFilter(name);
 }
 
-const Filter Graph::operator [](LPCWSTR name) const
+Filter Graph::operator [](const wstring& name)
 {
 	return FindFilter(name);
 }

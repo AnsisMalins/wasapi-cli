@@ -8,7 +8,7 @@ namespace DirectShow
 		Pin(IPin* ptr);
 		void Connect(Pin& receivePin);
 		Pin ConnectedTo();
-		const Pin ConnectedTo() const;
+		AM_MEDIA_TYPE ConnectionMediaType() const;
 		void Disconnect();
 		PIN_DIRECTION QueryDirection() const;
 		std::wstring QueryId() const;

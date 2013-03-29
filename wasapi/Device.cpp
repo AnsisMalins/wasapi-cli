@@ -27,7 +27,7 @@ DWORD Device::GetState() const
 	return result;
 }
 
-const PropertyStore Device::OpenPropertyStore() const
+PropertyStore Device::OpenPropertyStore() const
 {
 	CComPtr<IPropertyStore> ptr;
 	HR(device->OpenPropertyStore(STGM_READ, &ptr));

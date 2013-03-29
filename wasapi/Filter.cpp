@@ -17,6 +17,13 @@ Filter::Filter(LPCOLESTR clsid)
 	HR(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
 }
 
+Filter::Filter(const wstring& clsid)
+{
+	CLSID clsid2;
+	HR(CLSIDFromString(clsid.c_str(), &clsid2));
+	HR(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
+}
+
 Filter::Filter(IBaseFilter* ptr) :
 	baseFilter(ptr)
 {
@@ -29,19 +36,7 @@ Pin Filter::FindPin(LPCWSTR name)
 	return Pin(ptr);
 }
 
-const Pin Filter::FindPin(LPCWSTR name) const
-{
-	CComPtr<IPin> ptr;
-	HR(baseFilter->FindPin(name, &ptr));
-	return Pin(ptr);
-}
-
 Pin Filter::FindPin(const wstring& name)
-{
-	return FindPin(name.c_str());
-}
-
-const Pin Filter::FindPin(const wstring& name) const
 {
 	return FindPin(name.c_str());
 }
@@ -56,22 +51,28 @@ Filter::operator const IBaseFilter*() const
 	return baseFilter;
 }
 
+/*Pin Filter::operator [](unsigned int index)
+{
+	CComPtr<IEnumPins> enumPins;
+	HR(baseFilter->EnumPins(&enumPins));
+	CComPtr<IPin> ptr;
+	index++;
+	while (index > 0)
+	{
+		index--;
+		if (enumPins->Next(1, &ptr, NULL) != S_OK)
+			throw out_of_range(
+
+	}
+	for (; index >= 0; index--, ) enumPins->Next(1, 
+}*/
+
 Pin Filter::operator [](LPCWSTR name)
 {
 	return FindPin(name);
 }
 
-const Pin Filter::operator [](LPCWSTR name) const
-{
-	return FindPin(name);
-}
-
 Pin Filter::operator [](const wstring& name)
-{
-	return FindPin(name.c_str());
-}
-
-const Pin Filter::operator [](const wstring& name) const
 {
 	return FindPin(name.c_str());
 }

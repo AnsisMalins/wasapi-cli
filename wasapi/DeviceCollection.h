@@ -11,8 +11,7 @@ namespace WASAPI
 		Device Item(UINT index) const;
 		operator IMMDeviceCollection*();
 		operator const IMMDeviceCollection*() const;
-		Device operator [](UINT index);
-		const Device operator [](UINT index) const;
+		Device operator [](UINT index) const;
 	private:
 		CComPtr<IMMDeviceCollection> deviceCollection;
 	};

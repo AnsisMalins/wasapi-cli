@@ -33,12 +33,7 @@ DeviceCollection::operator const IMMDeviceCollection *() const
 	return deviceCollection;
 }
 
-Device DeviceCollection::operator [](UINT index)
-{
-	return Item(index);
-}
-
-const Device DeviceCollection::operator [](UINT index) const
+Device DeviceCollection::operator [](UINT index) const
 {
 	return Item(index);
 }
