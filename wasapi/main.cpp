@@ -5,6 +5,7 @@
 #include "Graph.h"
 #include "StdoutRenderer.h"
 
+using namespace COM;
 using namespace DirectShow;
 using namespace std;
 using namespace WASAPI;
@@ -73,7 +74,12 @@ void Main(const vector<wstring>& args)
 					device = wasapi.GetDefaultDevice(eRender, eMultimedia);
 				else
 					device = wasapi.GetDevice(*arg);
-				filter = device.ToFilter();
+				/*if (*(arg + 1) == L"loopback")
+				{
+					++arg;
+					filter = device.ToFilter();
+				}
+				else*/ filter = device.ToFilter();
 			}
 			else
 			{

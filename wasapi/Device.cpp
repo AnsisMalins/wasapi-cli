@@ -2,6 +2,7 @@
 #include "Device.h"
 #include "com_exception.h"
 
+using namespace COM;
 using namespace DirectShow;
 using namespace std;
 using namespace WASAPI;
@@ -34,10 +35,17 @@ PropertyStore Device::OpenPropertyStore() const
 	return PropertyStore(ptr);
 }
 
+AudioClient Device::ToAudioClient(DWORD params) const
+{
+	CComPtr<IAudioClient> ptr;
+	HR(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&ptr));
+	return AudioClient(ptr, params);
+}
+
 Filter Device::ToFilter() const
 {
 	CComPtr<IBaseFilter> ptr;
-	HR(device->Activate(IID_IBaseFilter, CLSCTX_ALL, NULL, (void**)&ptr));
+	HR(device->Activate(__uuidof(IBaseFilter), CLSCTX_ALL, NULL, (void**)&ptr));
 	return Filter(ptr);
 }
 

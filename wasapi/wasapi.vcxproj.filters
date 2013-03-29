@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="com_exception.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Pin.cpp">
@@ -29,11 +28,19 @@
       <Filter>COM</Filter>
     </ClCompile>
     <ClCompile Include="StdoutRenderer.cpp">
-      <Filter>DirectShow</Filter>
+      <Filter>DirectShow\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioClient.cpp">
+      <Filter>WASAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="WasapiSource.cpp">
+      <Filter>DirectShow\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="com_exception.cpp">
+      <Filter>COM</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="com_exception.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Pin.h">
       <Filter>DirectShow</Filter>
@@ -60,7 +67,16 @@
       <Filter>COM</Filter>
     </ClInclude>
     <ClInclude Include="StdoutRenderer.h">
-      <Filter>DirectShow</Filter>
+      <Filter>DirectShow\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioClient.h">
+      <Filter>WASAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="WasapiSource.h">
+      <Filter>DirectShow\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="com_exception.h">
+      <Filter>COM</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +88,9 @@
     </Filter>
     <Filter Include="COM">
       <UniqueIdentifier>{3a73fca7-137d-41dc-a1af-376a94f3cf2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectShow\Filters">
+      <UniqueIdentifier>{e5fd2a73-e3d5-4432-939e-056dd4c75344}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

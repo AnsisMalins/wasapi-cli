@@ -1,6 +1,6 @@
 #pragma once
 
-namespace WASAPI
+namespace COM
 {
 	class PropertyStore
 	{

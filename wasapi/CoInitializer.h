@@ -1,8 +1,11 @@
 #pragma once
 
-class CoInitializer
+namespace COM
 {
-public:
-	CoInitializer(DWORD dwCoInit);
-	~CoInitializer();
-};
+	class CoInitializer
+	{
+	public:
+		CoInitializer(DWORD dwCoInit);
+		~CoInitializer();
+	};
+}

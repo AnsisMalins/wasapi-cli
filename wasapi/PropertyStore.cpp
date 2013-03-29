@@ -2,7 +2,7 @@
 #include "PropertyStore.h"
 #include "com_exception.h"
 
-using namespace WASAPI;
+using namespace COM;
 
 PropertyStore::PropertyStore(IPropertyStore* ptr) :
 	propertyStore(ptr)

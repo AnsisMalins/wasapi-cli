@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "com_exception.h"
 
+using namespace COM;
 using namespace std;
 
 com_exception::com_exception(const char* what_arg, HRESULT hr) :

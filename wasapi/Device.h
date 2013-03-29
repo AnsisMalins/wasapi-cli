@@ -1,5 +1,6 @@
 #pragma once
 #include "Filter.h"
+#include "AudioClient.h"
 #include "PropertyStore.h"
 
 namespace WASAPI
@@ -10,7 +11,8 @@ namespace WASAPI
 		Device(IMMDevice* ptr);
 		std::wstring GetId() const;
 		DWORD GetState() const;
-		PropertyStore OpenPropertyStore() const;
+		COM::PropertyStore OpenPropertyStore() const;
+		AudioClient ToAudioClient(DWORD params) const;
 		DirectShow::Filter ToFilter() const;
 		operator IMMDevice*();
 		operator const IMMDevice*() const;

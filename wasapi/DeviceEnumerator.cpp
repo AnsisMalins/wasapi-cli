@@ -2,6 +2,7 @@
 #include "DeviceEnumerator.h"
 #include "com_exception.h"
 
+using namespace COM;
 using namespace std;
 using namespace WASAPI;
 

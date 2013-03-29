@@ -2,6 +2,7 @@
 #include "Pin.h"
 #include "com_exception.h"
 
+using namespace COM;
 using namespace DirectShow;
 using namespace std;
 
