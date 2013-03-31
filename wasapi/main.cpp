@@ -4,6 +4,7 @@
 #include "DeviceEnumerator.h"
 #include "Graph.h"
 #include "StdoutRenderer.h"
+#include "WasapiSource.h"
 
 using namespace COM;
 using namespace DirectShow;
@@ -80,6 +81,18 @@ void Main(const vector<wstring>& args)
 					filter = device.ToFilter();
 				}
 				else*/ filter = device.ToFilter();
+			}
+			else if (*arg == L"wsrc")
+			{
+				HRESULT hr;
+				filter = Filter(new WasapiSource(DeviceEnumerator().GetDefaultDevice(eCapture, eMultimedia).GetId().c_str(), FALSE, &hr));
+				HR(hr);
+			}
+			else if (*arg == L"wlp")
+			{
+				HRESULT hr;
+				filter = Filter(new WasapiSource(DeviceEnumerator().GetDefaultDevice(eRender, eMultimedia).GetId().c_str(), TRUE, &hr));
+				HR(hr);
 			}
 			else
 			{
@@ -179,8 +192,8 @@ int wmain(int argc, wchar_t** argv)
 		args.push_back(wstring(L""));
 
 		args.push_back(wstring(L"--add-filter"));
-		args.push_back(wstring(L"wasapi"));
-		args.push_back(wstring(L"capture-multimedia"));
+		args.push_back(wstring(L"wlp"));
+		//args.push_back(wstring(L"capture-multimedia"));
 		args.push_back(wstring(L"capture"));
 
 		args.push_back(wstring(L"--add-filter"));
@@ -188,13 +201,15 @@ int wmain(int argc, wchar_t** argv)
 		args.push_back(wstring(L"render-multimedia"));
 		args.push_back(wstring(L"render"));
 
+		//args.push_back(wstring(L"--print-graph"));
+
 		args.push_back(wstring(L"--connect"));
 		args.push_back(wstring(L"capture"));
-		args.push_back(wstring(L"Capture"));
+		args.push_back(wstring(L"1"));
 		args.push_back(wstring(L"render"));
 		args.push_back(wstring(L"Audio Input pin (rendered)"));
 		
-		//args.push_back(wstring(L"--print-graph"));
+		args.push_back(wstring(L"--print-graph"));
 #else
 		for (int i = 0; i < argc; i++) args.push_back(wstring(argv[i]));
 #endif

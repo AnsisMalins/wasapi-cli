@@ -3,22 +3,33 @@
 
 namespace DirectShow
 {
-	class WasapiSource : CSource
+	class WasapiSource : public CSource
 	{
 	public:
-		WasapiSource(WASAPI::AudioClient&, HRESULT* phr);
+		WasapiSource(LPCWSTR id, BOOL loopback, HRESULT* phr);
 	private:
 		class Pin : CSourceStream
 		{
 		public:
-			Pin(CSource* pms, WASAPI::AudioClient& audioClient, HRESULT* phr);
-			HRESULT CheckMediaType(const CMediaType* mediaType);
-			HRESULT DecideBufferSize(IMemAllocator *pAlloc, ALLOCATOR_PROPERTIES *ppropInputRequest);
-			HRESULT FillBuffer(IMediaSample *pSample);
-			HRESULT GetMediaType(int iPosition, CMediaType *pMediaType);
+			Pin(CSource* pms, LPCWSTR id, BOOL loopback, HRESULT* phr);
+			HRESULT DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* ppropInputRequest);
+		protected:
+			HRESULT CheckMediaType(const CMediaType* pMediaType);
+			HRESULT FillBuffer(IMediaSample* pSample);
+			HRESULT GetMediaType(CMediaType* pMediaType);
+			HRESULT OnThreadDestroy();
+			HRESULT OnThreadStartPlay();
 		private:
-			WASAPI::AudioClient audioClient;
+			HRESULT Initialize();
+			UINT32 m_cbFrame;
+			HANDLE m_hBufferReady;
+			BOOL m_Initialized;
+			BOOL m_Loopback;
+			CComPtr<IAudioClient> m_pAudioClient;
+			CComPtr<IAudioCaptureClient> m_pCaptureClient;
+			CComPtr<IAudioClient> m_pEventClient;
+			REFERENCE_TIME m_rtPrevious;
 		};
-		Pin pin;
+		Pin m_Pin;
 	};
 }

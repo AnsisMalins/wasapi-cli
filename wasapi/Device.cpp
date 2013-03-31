@@ -35,12 +35,12 @@ PropertyStore Device::OpenPropertyStore() const
 	return PropertyStore(ptr);
 }
 
-AudioClient Device::ToAudioClient(DWORD params) const
+/*AudioClient Device::ToAudioClient(DWORD params) const
 {
 	CComPtr<IAudioClient> ptr;
 	HR(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&ptr));
 	return AudioClient(ptr, params);
-}
+}*/
 
 Filter Device::ToFilter() const
 {
