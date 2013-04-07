@@ -1,4 +1,5 @@
 #pragma once
+#include "wexception.h"
 
 namespace COM
 {
@@ -16,5 +17,3 @@ namespace COM
 }
 
 HRESULT throw_on_error(HRESULT hr, const char* context);
-
-#define HR(x) (throw_on_error((x), __FILE__ ":" STR(__LINE__)))

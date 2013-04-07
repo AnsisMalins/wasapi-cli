@@ -67,22 +67,22 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\build\x86-$(Configuration)\</OutDir>
-    <IntDir>..\build\tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>..\build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\build\$(Platform)-$(Configuration)\</OutDir>
-    <IntDir>..\build\tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>..\build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\build\x86-$(Configuration)\</OutDir>
-    <IntDir>..\build\tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>..\build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\build\$(Platform)-$(Configuration)\</OutDir>
-    <IntDir>..\build\tmp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>..\build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,14 +95,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib;strmbasd.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\build\tmp\baseclasses\$(PlatformName)\$(ConfigurationName);..\build\tmp\dsnet\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -118,14 +118,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib;strmbasd.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\build\tmp\baseclasses\$(PlatformName)\$(ConfigurationName);..\build\tmp\dsnet\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,16 +138,16 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib;strmbase.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\build\tmp\baseclasses\$(PlatformName)\$(ConfigurationName);..\build\tmp\dsnet\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -163,16 +163,16 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>../baseclasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>quartz.lib;strmbase.lib</AdditionalDependencies>
+      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>..\build\tmp\$(PlatformName)\$(ConfigurationName)\baseclasses</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\build\tmp\baseclasses\$(PlatformName)\$(ConfigurationName);..\build\tmp\dsnet\$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -195,9 +195,11 @@
     </ClCompile>
     <ClCompile Include="StdoutRenderer.cpp" />
     <ClCompile Include="WasapiSource.cpp" />
+    <ClCompile Include="wexception.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioClient.h" />
+    <ClInclude Include="Const.h" />
     <ClInclude Include="DeviceCollection.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="CoInitializer.h" />
@@ -210,6 +212,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdoutRenderer.h" />
     <ClInclude Include="WasapiSource.h" />
+    <ClInclude Include="wexception.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\baseclasses\baseclasses.vcxproj">

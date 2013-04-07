@@ -12,10 +12,10 @@ void RemoveFromRot(DWORD pdwRegister);
 Graph::Graph(const IID& clsid, bool addToRot) :
 	rotEntry(0)
 {
-	HR(graphBuilder.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
-	if (addToRot) HR(AddToRot(graphBuilder, &rotEntry));
-	HR(graphBuilder.QueryInterface(&mediaControl));
-	HR(graphBuilder.QueryInterface(&mediaEvent));
+	EX(graphBuilder.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
+	if (addToRot) EX(AddToRot(graphBuilder, &rotEntry));
+	EX(graphBuilder.QueryInterface(&mediaControl));
+	EX(graphBuilder.QueryInterface(&mediaEvent));
 }
 
 Graph::~Graph()
@@ -27,12 +27,12 @@ Graph::~Graph()
 
 void Graph::Abort()
 {
-	HR(graphBuilder->Abort());
+	EX(graphBuilder->Abort());
 }
 
 void Graph::AddFilter(Filter& filter, LPCWSTR name)
 {
-	HR(graphBuilder->AddFilter(filter, name));
+	EX(graphBuilder->AddFilter(filter, name));
 }
 
 void Graph::AddFilter(Filter& filter, const wstring& name)
@@ -43,7 +43,7 @@ void Graph::AddFilter(Filter& filter, const wstring& name)
 Filter Graph::AddSourceFilter(LPCWSTR fileName, LPCWSTR filterName)
 {
 	CComPtr<IBaseFilter> ptr;
-	HR(graphBuilder->AddSourceFilter(fileName, filterName, &ptr));
+	EX(graphBuilder->AddSourceFilter(fileName, filterName, &ptr));
 	return Filter(ptr);
 }
 
@@ -64,39 +64,39 @@ Filter Graph::AddSourceFilter(const wstring& fileName, const wstring& filterName
 
 void Graph::Connect(Pin& pinOut, Pin& pinIn)
 {
-	HR(graphBuilder->Connect(pinOut, pinIn));
+	EX(graphBuilder->Connect(pinOut, pinIn));
 }
 
 void Graph::ConnectDirect(Pin& pinOut, Pin& pinIn)
 {
-	HR(graphBuilder->ConnectDirect(pinOut, pinIn, NULL));
+	EX(graphBuilder->ConnectDirect(pinOut, pinIn, NULL));
 }
 
 void Graph::Disconnect(Pin& pin)
 {
-	HR(graphBuilder->Disconnect(pin));
+	EX(graphBuilder->Disconnect(pin));
 }
 
 long Graph::GetEvent()
 {
 	long result;
 	LONG_PTR param1, param2;
-	HR(mediaEvent->GetEvent(&result, &param1, &param2, INFINITE));
-	HR(mediaEvent->FreeEventParams(result, param1, param2));
+	EX(mediaEvent->GetEvent(&result, &param1, &param2, INFINITE));
+	EX(mediaEvent->FreeEventParams(result, param1, param2));
 	return result;
 }
 
 HANDLE Graph::GetEventHandle() const
 {
 	HANDLE result;
-	HR(mediaEvent->GetEventHandle((OAEVENT*)&result));
+	EX(mediaEvent->GetEventHandle((OAEVENT*)&result));
 	return result;
 }
 
 Filter Graph::FindFilter(LPCWSTR name)
 {
 	CComPtr<IBaseFilter> ptr;
-	HR(graphBuilder->FindFilterByName(name, &ptr));
+	EX(graphBuilder->FindFilterByName(name, &ptr));
 	return Filter(ptr);
 }
 
@@ -107,27 +107,27 @@ Filter Graph::FindFilter(const wstring& name)
 
 void Graph::Pause()
 {
-	HR(mediaControl->Pause());
+	EX(mediaControl->Pause());
 }
 
 void Graph::Reconnect(Pin& pin)
 {
-	HR(graphBuilder->Reconnect(pin));
+	EX(graphBuilder->Reconnect(pin));
 }
 
 void Graph::RemoveFilter(Filter& filter)
 {
-	HR(graphBuilder->RemoveFilter(filter));
+	EX(graphBuilder->RemoveFilter(filter));
 }
 
 void Graph::Render(Pin& pin)
 {
-	HR(graphBuilder->Render(pin));
+	EX(graphBuilder->Render(pin));
 }
 
 void Graph::RenderFile(LPCWSTR fileName)
 {
-	HR(graphBuilder->RenderFile(fileName, NULL));
+	EX(graphBuilder->RenderFile(fileName, NULL));
 }
 
 void Graph::RenderFile(const wstring& fileName)
@@ -137,17 +137,17 @@ void Graph::RenderFile(const wstring& fileName)
 
 void Graph::Run()
 {
-	HR(mediaControl->Run());
+	EX(mediaControl->Run());
 }
 
 void Graph::SetLogFile(DWORD_PTR fileHandle)
 {
-	HR(graphBuilder->SetLogFile(fileHandle));
+	EX(graphBuilder->SetLogFile(fileHandle));
 }
 
 void Graph::Stop()
 {
-	HR(mediaControl->Stop());
+	EX(mediaControl->Stop());
 }
 
 wstring Graph::ToString() const
@@ -197,7 +197,7 @@ wstring Graph::ToString() const
 long Graph::WaitForCompletion()
 {
 	long result;
-	HR(mediaEvent->WaitForCompletion(INFINITE, &result));
+	EX(mediaEvent->WaitForCompletion(INFINITE, &result));
 	return result;
 }
 
@@ -230,6 +230,8 @@ Filter Graph::operator [](const wstring& name)
 {
 	return FindFilter(name);
 }
+
+HANDLE  Graph::sigint = NULL;
 
 HRESULT AddToRot(IUnknown *pUnkGraph, DWORD *pdwRegister) 
 {

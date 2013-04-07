@@ -1,8 +1,12 @@
 #include "stdafx.h"
 #include "PropertyStore.h"
-#include "com_exception.h"
+#include "wexception.h"
 
 using namespace COM;
+
+PropertyStore::PropertyStore()
+{
+}
 
 PropertyStore::PropertyStore(IPropertyStore* ptr) :
 	propertyStore(ptr)
@@ -11,20 +15,21 @@ PropertyStore::PropertyStore(IPropertyStore* ptr) :
 
 void PropertyStore::Commit()
 {
-	HR(propertyStore->Commit());
+	//if (propertyStore == NULL) throw POINTER_
+	EX(propertyStore->Commit());
 }
 
 PROPERTYKEY PropertyStore::GetAt(DWORD index) const
 {
 	PROPERTYKEY result;
-	HR(propertyStore->GetAt(index, &result));
+	EX(propertyStore->GetAt(index, &result));
 	return result;
 }
 
 DWORD PropertyStore::GetCount() const
 {
 	DWORD result;
-	HR(propertyStore->GetCount(&result));
+	EX(propertyStore->GetCount(&result));
 	return result;
 }
 
@@ -32,14 +37,14 @@ PROPVARIANT PropertyStore::GetValue(REFPROPERTYKEY key) const
 {
 	PROPVARIANT result;
 	PropVariantInit(&result);
-	HR(propertyStore->GetValue(key, &result));
+	EX(propertyStore->GetValue(key, &result));
 	return result;
 }
 
-/*void PropertyStore::SetValue(REFPROPERTYKEY key, REFPROPVARIANT value)
+void PropertyStore::SetValue(REFPROPERTYKEY key, REFPROPVARIANT value)
 {
-	HR(propertyStore->SetValue(key, value));
-}*/
+	EX(propertyStore->SetValue(key, value));
+}
 
 PropertyStore::operator IPropertyStore *()
 {

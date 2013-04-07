@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Device.h"
-#include "com_exception.h"
+#include "wexception.h"
 
 using namespace COM;
 using namespace DirectShow;
@@ -15,7 +15,7 @@ Device::Device(IMMDevice* ptr) :
 wstring Device::GetId() const
 {
 	LPWSTR id;
-	HR(device->GetId(&id));
+	EX(device->GetId(&id));
 	wstring result(id);
 	CoTaskMemFree(id);
 	return result;
@@ -24,28 +24,28 @@ wstring Device::GetId() const
 DWORD Device::GetState() const
 {
 	DWORD result;
-	HR(device->GetState(&result));
+	EX(device->GetState(&result));
 	return result;
 }
 
-PropertyStore Device::OpenPropertyStore() const
+Const<PropertyStore> Device::OpenPropertyStore() const
 {
 	CComPtr<IPropertyStore> ptr;
-	HR(device->OpenPropertyStore(STGM_READ, &ptr));
-	return PropertyStore(ptr);
+	EX(device->OpenPropertyStore(STGM_READ, &ptr));
+	return Const<PropertyStore>(PropertyStore(ptr));
 }
 
 /*AudioClient Device::ToAudioClient(DWORD params) const
 {
 	CComPtr<IAudioClient> ptr;
-	HR(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&ptr));
+	EX(device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&ptr));
 	return AudioClient(ptr, params);
 }*/
 
 Filter Device::ToFilter() const
 {
 	CComPtr<IBaseFilter> ptr;
-	HR(device->Activate(__uuidof(IBaseFilter), CLSCTX_ALL, NULL, (void**)&ptr));
+	EX(device->Activate(__uuidof(IBaseFilter), CLSCTX_ALL, NULL, (void**)&ptr));
 	return Filter(ptr);
 }
 

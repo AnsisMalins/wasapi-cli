@@ -13,39 +13,39 @@ Pin::Pin(IPin* ptr) :
 
 void Pin::Connect(Pin& receivePin)
 {
-	HR(pin->Connect(receivePin, NULL));
+	EX(pin->Connect(receivePin, NULL));
 }
 
 Pin Pin::ConnectedTo()
 {
 	CComPtr<IPin> ptr;
-	HR(pin->ConnectedTo(&ptr));
+	EX(pin->ConnectedTo(&ptr));
 	return Pin(ptr);
 }
 
 AM_MEDIA_TYPE Pin::ConnectionMediaType() const
 {
 	AM_MEDIA_TYPE result;
-	HR(pin->ConnectionMediaType(&result));
+	EX(pin->ConnectionMediaType(&result));
 	return result;
 }
 
 void Pin::Disconnect()
 {
-	HR(pin->Disconnect());
+	EX(pin->Disconnect());
 }
 
 PIN_DIRECTION Pin::QueryDirection() const
 {
 	PIN_DIRECTION result;
-	HR(pin->QueryDirection(&result));
+	EX(pin->QueryDirection(&result));
 	return result;
 }
 
 wstring Pin::QueryId() const
 {
 	LPWSTR id;
-	HR(pin->QueryId(&id));
+	EX(pin->QueryId(&id));
 	wstring result(id);
 	CoTaskMemFree(id);
 	return result;

@@ -11,15 +11,17 @@ using namespace DirectShow;
 using namespace std;
 using namespace WASAPI;
 
-void get_next_arg(const vector<wstring>& args, vector<wstring>::const_iterator& arg, const char* message)
-{
-	if (++arg == args.end()) throw invalid_argument(message);
-}
+void WaitforCompletion(Graph& graph);
+void Main(const vector<wstring>& args);
+void on_sigint(int sig);
 
 HANDLE hSigint;
-void on_sigint(int sigint)
+
+wstring get_next_arg(const vector<wstring>& args, vector<wstring>::const_iterator& arg, char* a)
 {
-	SetEvent(hSigint);
+	if (++arg == args.end())
+		throw invalid_argument("Unexpected end of arguments.");
+	return  *arg;
 }
 
 bool try_get_next_arg(const vector<wstring>& args, vector<wstring>::const_iterator& arg)
@@ -29,15 +31,18 @@ bool try_get_next_arg(const vector<wstring>& args, vector<wstring>::const_iterat
 
 void Main(const vector<wstring>& args)
 {
+	hSigint = CreateEvent(NULL, TRUE, FALSE, NULL);
+	signal(SIGINT, on_sigint);
+
 	CoInitializer coinit(COINIT_MULTITHREADED);
 
 	Graph graph(CLSID_FilterGraph, true);
 
-	hSigint = CreateEvent(NULL, TRUE, FALSE, NULL);
-	signal(SIGINT, on_sigint);
 
 	vector<wstring>::const_iterator arg = args.begin();
-	if (!try_get_next_arg(args, arg) || *arg == L"/?" || *arg == L"--help")
+
+	++arg;
+	if (arg == args.end() || *arg == L"/?" || *arg == L"--help")
 	{
 		cout << "Usage:" << endl
 			<< "-a  --add-filter <filter type> <filter name>" << endl
@@ -48,17 +53,22 @@ void Main(const vector<wstring>& args)
 			<< "-r  --render-pin <filter name> <pin name>" << endl;
 		return;
 	}
+
+	//Filter 
+
 	while (true)
 	{
 		if (*arg == L"-a" || *arg == L"--add-filter")
 		{
+			++arg;
+
 			get_next_arg(args, arg, "--add-filter filter type missing");
 			Filter filter((IBaseFilter*)NULL);
 			if (*arg == L"stdout")
 			{
 				HRESULT hr = S_OK;
 				filter = Filter(new StdoutRenderer(&hr));
-				HR(hr);
+				EX(hr);
 			}
 			else if (*arg == L"wasapi")
 			{
@@ -86,13 +96,32 @@ void Main(const vector<wstring>& args)
 			{
 				HRESULT hr;
 				filter = Filter(new WasapiSource(DeviceEnumerator().GetDefaultDevice(eCapture, eMultimedia).GetId().c_str(), FALSE, &hr));
-				HR(hr);
+				EX(hr);
 			}
 			else if (*arg == L"wlp")
 			{
 				HRESULT hr;
 				filter = Filter(new WasapiSource(DeviceEnumerator().GetDefaultDevice(eRender, eMultimedia).GetId().c_str(), TRUE, &hr));
-				HR(hr);
+				EX(hr);
+			}
+			else if (*arg == L"dsrecv")
+			{
+				HRESULT hr;
+				CComPtr<CNetworkReceiverFilter> dsrecv = new CNetworkReceiverFilter(NAME("CNetworkReceiverFilter"), NULL, &hr);
+				EX(hr);
+				//get_next_arg(args, arg, 
+				//EX(dsrecv->SetNetworkInterface(3232235590));
+				//EX(dsrecv->SetMulticastGroup(
+				filter = Filter(dsrecv);
+			}
+			else if (*arg == L"dssend")
+			{
+				HRESULT hr;
+				CComPtr<CNetworkSend> dssend = new CNetworkSend(NAME("CNetworkSend"), NULL, &hr);
+				EX(hr);
+				//EX(dssend->SetNetworkInterface(
+				//EX(dssend->SetMulticastGroup(
+				filter = Filter(dssend);
 			}
 			else
 			{
@@ -134,7 +163,7 @@ void Main(const vector<wstring>& args)
 			for (UINT i = 0; i < devices.GetCount(); i++)
 			{
 				Device device = devices[i];
-				PROPVARIANT name = device.OpenPropertyStore()[PKEY_Device_FriendlyName];
+				PROPVARIANT name = (*device.OpenPropertyStore())[PKEY_Device_FriendlyName];
 				wcout << device.GetId() << endl << name.pwszVal << endl << endl;
 				PropVariantClear(&name);
 			}
@@ -171,14 +200,27 @@ void Main(const vector<wstring>& args)
 	}
 
 	graph.Run();
+	graph.Stop();
+}
+
+void on_sigint(int sigint)
+{
+	if (!SetEvent(hSigint))
+	{
+
+	}
+}
+
+void WaitForCompletion(Graph& graph)
+{
 	HANDLE handles[] = { hSigint, graph.GetEventHandle() };
+
 	while (true)
 	{
 		if (WaitForMultipleObjects(sizeof(handles) / sizeof(HANDLE), handles, FALSE, INFINITE) == 0
 			|| graph.GetEvent() == EC_COMPLETE)
 			break;
 	}
-	graph.Stop();
 }
 
 int wmain(int argc, wchar_t** argv)

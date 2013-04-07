@@ -44,5 +44,6 @@ namespace DirectShow
 		CComPtr<IMediaControl> mediaControl;
 		CComPtr<IMediaEvent> mediaEvent;
 		DWORD rotEntry;
+		static HANDLE sigint;
 	};
 }

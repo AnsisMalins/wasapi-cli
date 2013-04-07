@@ -15,13 +15,13 @@ void AudioClient::GetBuffer(BYTE** buffer, UINT32* frameCount)
 {
 	if (renderClient != NULL)
 	{
-		HR(renderClient->GetBuffer(bufferSize, buffer));
+		EX(renderClient->GetBuffer(bufferSize, buffer));
 		*frameCount = bufferSize;
 	}
 	else
 	{
 		DWORD flags;
-		HR(captureClient->GetBuffer(buffer, frameCount, &flags, NULL, NULL));
+		EX(captureClient->GetBuffer(buffer, frameCount, &flags, NULL, NULL));
 		bufferSize = *frameCount;
 		if (flags & AUDCLNT_BUFFERFLAGS_SILENT)
 			memset(buffer, 0, *frameCount * frameSize);
@@ -36,21 +36,21 @@ UINT32 AudioClient::GetBufferSize() const
 UINT32 AudioClient::GetCurrentPadding() const
 {
 	UINT32 result;
-	HR(audioClient->GetCurrentPadding(&result));
+	EX(audioClient->GetCurrentPadding(&result));
 	return result * frameSize;
 }
 
 REFERENCE_TIME AudioClient::GetDevicePeriod() const
 {
 	REFERENCE_TIME result;
-	HR(audioClient->GetDevicePeriod(&result, NULL));
+	EX(audioClient->GetDevicePeriod(&result, NULL));
 	return result;
 }
 
 WAVEFORMATEX AudioClient::GetMixFormat() const
 {
 	WAVEFORMATEX* ptr;
-	HR(audioClient->GetMixFormat(&ptr));
+	EX(audioClient->GetMixFormat(&ptr));
 	WAVEFORMATEX result = *ptr;
 	CoTaskMemFree(ptr);
 	result.cbSize = 0;
@@ -60,27 +60,27 @@ WAVEFORMATEX AudioClient::GetMixFormat() const
 REFERENCE_TIME AudioClient::GetStreamLatency() const
 {
 	REFERENCE_TIME result;
-	HR(audioClient->GetStreamLatency(&result));
+	EX(audioClient->GetStreamLatency(&result));
 	return result;
 }
 
 void AudioClient::Initialize(DWORD params)
 {
 	WAVEFORMATEX* format;
-	HR(audioClient->GetMixFormat(&format));
+	EX(audioClient->GetMixFormat(&format));
 	HRESULT hr = audioClient->Initialize(
 		AUDCLNT_SHAREMODE_SHARED, params, 0, 0, format, NULL);
 	frameSize = format->nBlockAlign;
 	CoTaskMemFree(format);
-	HR(hr);
-	HR(audioClient->GetBufferSize(&bufferSize));
+	EX(hr);
+	EX(audioClient->GetBufferSize(&bufferSize));
 	hr = audioClient->GetService(
 		__uuidof(IAudioRenderClient), (void**)&renderClient);
 	if (hr == E_NOINTERFACE)
-		HR(audioClient->GetService(
+		EX(audioClient->GetService(
 			__uuidof(IAudioCaptureClient), (void**)&captureClient));
 	else
-		HR(hr);
+		EX(hr);
 }
 
 bool AudioClient::IsFormatSupported(const WAVEFORMATEX& format)
@@ -95,27 +95,27 @@ bool AudioClient::IsFormatSupported(const WAVEFORMATEX& format)
 void AudioClient::ReleaseBuffer()
 {
 	if (renderClient != NULL)
-		HR(renderClient->ReleaseBuffer(bufferSize, 0));
+		EX(renderClient->ReleaseBuffer(bufferSize, 0));
 	else
-		HR(captureClient->ReleaseBuffer(bufferSize));
+		EX(captureClient->ReleaseBuffer(bufferSize));
 }
 
 void AudioClient::Reset()
 {
-	HR(audioClient->Reset());
+	EX(audioClient->Reset());
 }
 
 void AudioClient::SetEventHandle(HANDLE eventHandle)
 {
-	HR(audioClient->SetEventHandle(eventHandle));
+	EX(audioClient->SetEventHandle(eventHandle));
 }
 
 void AudioClient::Start()
 {
-	HR(audioClient->Start());
+	EX(audioClient->Start());
 }
 
 void AudioClient::Stop()
 {
-	HR(audioClient->Stop());
+	EX(audioClient->Stop());
 }

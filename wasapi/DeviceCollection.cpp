@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DeviceCollection.h"
-#include "com_exception.h"
+#include "wexception.h"
 
 using namespace COM;
 using namespace WASAPI;
@@ -13,14 +13,14 @@ DeviceCollection::DeviceCollection(IMMDeviceCollection* ptr) :
 UINT DeviceCollection::GetCount() const
 {
 	UINT result;
-	HR(deviceCollection->GetCount(&result));
+	EX(deviceCollection->GetCount(&result));
 	return result;
 }
 
 Device DeviceCollection::Item(UINT index) const
 {
 	CComPtr<IMMDevice> ptr;
-	HR(deviceCollection->Item(index, &ptr));
+	EX(deviceCollection->Item(index, &ptr));
 	return Device(ptr);
 }
 

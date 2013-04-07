@@ -39,6 +39,7 @@
     <ClCompile Include="com_exception.cpp">
       <Filter>COM</Filter>
     </ClCompile>
+    <ClCompile Include="wexception.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -78,6 +79,8 @@
     <ClInclude Include="com_exception.h">
       <Filter>COM</Filter>
     </ClInclude>
+    <ClInclude Include="Const.h" />
+    <ClInclude Include="wexception.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectShow">

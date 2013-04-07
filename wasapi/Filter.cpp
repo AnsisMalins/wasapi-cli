@@ -8,21 +8,21 @@ using namespace std;
 
 Filter::Filter(const IID& clsid)
 {
-	HR(baseFilter.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
+	EX(baseFilter.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
 }
 
 Filter::Filter(LPCOLESTR clsid)
 {
 	CLSID clsid2;
-	HR(CLSIDFromString(clsid, &clsid2));
-	HR(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
+	EX(CLSIDFromString(clsid, &clsid2));
+	EX(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
 }
 
 Filter::Filter(const wstring& clsid)
 {
 	CLSID clsid2;
-	HR(CLSIDFromString(clsid.c_str(), &clsid2));
-	HR(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
+	EX(CLSIDFromString(clsid.c_str(), &clsid2));
+	EX(baseFilter.CoCreateInstance(clsid2, NULL, CLSCTX_INPROC_SERVER));
 }
 
 Filter::Filter(IBaseFilter* ptr) :
@@ -33,7 +33,7 @@ Filter::Filter(IBaseFilter* ptr) :
 Pin Filter::FindPin(LPCWSTR name)
 {
 	CComPtr<IPin> ptr;
-	HR(baseFilter->FindPin(name, &ptr));
+	EX(baseFilter->FindPin(name, &ptr));
 	return Pin(ptr);
 }
 
@@ -55,7 +55,7 @@ Filter::operator const IBaseFilter*() const
 /*Pin Filter::operator [](unsigned int index)
 {
 	CComPtr<IEnumPins> enumPins;
-	HR(baseFilter->EnumPins(&enumPins));
+	EX(baseFilter->EnumPins(&enumPins));
 	CComPtr<IPin> ptr;
 	index++;
 	while (index > 0)

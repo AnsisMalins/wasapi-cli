@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define WINVER 0x0600
 
-//baseclasses
+//Base Classes
 #include <streams.h>
 
 // COM
@@ -13,6 +13,11 @@
 
 // DirectShow
 #include <dshow.h>
+
+// DSNetwork
+#include <dsnetifc.h>
+#include <dsrecv.h>
+#include <dssend.h>
 
 // STL
 #include <csignal>
@@ -33,3 +38,4 @@
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
+#define CONTEXT (__FILE__ ":" STR(__LINE__) " " )
