@@ -289,6 +289,7 @@ CNetworkReceiverFilter::Stop (
 }
 
 CUnknown *
+WINAPI
 CNetworkReceiverFilter::CreateInstance (
     IN  LPUNKNOWN   punk,
     OUT HRESULT *   phr

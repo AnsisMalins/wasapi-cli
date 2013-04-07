@@ -151,6 +151,7 @@ class CNetworkReceiverFilter :
 
         static
         CUnknown *
+		WINAPI
         CreateInstance (
             IN  LPUNKNOWN   punk,
             OUT HRESULT *   phr

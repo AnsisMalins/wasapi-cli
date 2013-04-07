@@ -171,6 +171,7 @@ class CNetworkSend :
 
         static
         CUnknown *
+		WINAPI
         CreateInstance (
             IN  LPUNKNOWN   punk,
             OUT HRESULT *   phr

@@ -236,6 +236,7 @@ CNetworkSend::Stop (
 }
 
 CUnknown *
+WINAPI
 CNetworkSend::CreateInstance (
     IN  LPUNKNOWN   punk,
     OUT HRESULT *   phr
