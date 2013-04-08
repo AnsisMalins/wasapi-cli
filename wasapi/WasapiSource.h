@@ -6,12 +6,12 @@ namespace DirectShow
 	class WasapiSource : public CSource
 	{
 	public:
-		WasapiSource(LPCWSTR id, BOOL loopback, HRESULT* phr);
+		WasapiSource(LPCWSTR id, HRESULT* phr);
 	private:
 		class Pin : CSourceStream
 		{
 		public:
-			Pin(CSource* pms, LPCWSTR id, BOOL loopback, HRESULT* phr);
+			Pin(CSource* pms, LPCWSTR id, HRESULT* phr);
 			HRESULT DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* ppropInputRequest);
 		protected:
 			HRESULT CheckMediaType(const CMediaType* pMediaType);
@@ -22,9 +22,9 @@ namespace DirectShow
 		private:
 			HRESULT Initialize();
 			UINT32 m_cbFrame;
+			EDataFlow m_eDataFlow;
 			HANDLE m_hBufferReady;
 			BOOL m_Initialized;
-			BOOL m_Loopback;
 			CComPtr<IAudioClient> m_pAudioClient;
 			CComPtr<IAudioCaptureClient> m_pCaptureClient;
 			CComPtr<IAudioClient> m_pEventClient;

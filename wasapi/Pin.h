@@ -5,6 +5,7 @@ namespace DirectShow
 	class Pin
 	{
 	public:
+		Pin();
 		Pin(IPin* ptr);
 		void Connect(Pin& receivePin);
 		Pin ConnectedTo();

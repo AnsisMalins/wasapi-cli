@@ -6,6 +6,10 @@ using namespace COM;
 using namespace DirectShow;
 using namespace std;
 
+Pin::Pin()
+{
+}
+
 Pin::Pin(IPin* ptr) :
 	pin(ptr)
 {

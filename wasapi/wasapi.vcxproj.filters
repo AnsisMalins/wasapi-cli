@@ -80,10 +80,11 @@
     <ClInclude Include="com_exception.h">
       <Filter>COM</Filter>
     </ClInclude>
-    <ClInclude Include="Const.h" />
     <ClInclude Include="wexception.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="win_exception.h" />
+    <ClInclude Include="com_iterator.h">
+      <Filter>COM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectShow">

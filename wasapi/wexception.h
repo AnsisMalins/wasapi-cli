@@ -12,4 +12,4 @@ private:
 	std::wstring _wwhat;
 };
 
-#define EX(x) (throw_on_error((x), CONTEXT))
+#define EX(x) (throw_on_error((x), CONTEXTW))

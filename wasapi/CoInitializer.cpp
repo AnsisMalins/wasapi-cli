@@ -9,6 +9,10 @@ CoInitializer::CoInitializer(DWORD dwCoInit)
 	EX(CoInitializeEx(NULL, dwCoInit));
 }
 
+CoInitializer::CoInitializer(const CoInitializer& co)
+{
+}
+
 CoInitializer::~CoInitializer()
 {
 	CoUninitialize();

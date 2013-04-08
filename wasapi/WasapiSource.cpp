@@ -4,17 +4,16 @@
 
 using namespace DirectShow;
 
-WasapiSource::WasapiSource(LPCWSTR id, BOOL loopback, HRESULT* phr) :
+WasapiSource::WasapiSource(LPCWSTR id, HRESULT* phr) :
 	CSource(NAME("WasapiSource"), NULL, GUID_NULL, phr),
-	m_Pin(this, id, loopback, phr)
+	m_Pin(this, id, phr)
 {
 }
 
-WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, BOOL loopback, HRESULT* phr) :
+WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 	CSourceStream(NAME("Capture"), phr, pms, L"1"),
 	m_hBufferReady(NULL),
 	m_Initialized(FALSE),
-	m_Loopback(loopback),
 	m_rtPrevious(0)
 {
 	if (id == NULL && phr != NULL) *phr = E_POINTER;
@@ -36,6 +35,21 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, BOOL loopback, HRESULT* phr) :
 		return;
 	}
 
+	CComPtr<IMMEndpoint> pEndpoint;
+	hr = pDevice->QueryInterface(__uuidof(IMMEndpoint), (void**)&pEndpoint);
+	if (FAILED(hr))
+	{
+		*phr = hr;
+		return;
+	}
+
+	hr = pEndpoint->GetDataFlow(&m_eDataFlow);
+	if (FAILED(hr))
+	{
+		*phr = hr;
+		return;
+	}
+
 	hr = pDevice->Activate(
 		__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_pAudioClient);
 	if (FAILED(hr))
@@ -44,7 +58,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, BOOL loopback, HRESULT* phr) :
 		return;
 	}
 
-	if (!loopback) return;
+	if (m_eDataFlow = eCapture) return;
 
 	hr = pDevice->Activate(
 		__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_pEventClient);
@@ -176,9 +190,9 @@ HRESULT WasapiSource::Pin::Initialize()
 	if (FAILED(hr)) return hr;
 
 	hr = m_pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
-		m_Loopback
-			? AUDCLNT_STREAMFLAGS_LOOPBACK
-			: AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+		m_eDataFlow == eCapture
+			? AUDCLNT_STREAMFLAGS_EVENTCALLBACK
+			: AUDCLNT_STREAMFLAGS_LOOPBACK,
 		0, 0, pDeviceFormat, NULL);
 	CoTaskMemFree(pDeviceFormat);
 	if (FAILED(hr)) return hr;
@@ -190,7 +204,7 @@ HRESULT WasapiSource::Pin::Initialize()
 	m_hBufferReady = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (m_hBufferReady == NULL) return HRESULT_FROM_WIN32(GetLastError());
 
-	if (m_Loopback)
+	if (m_eDataFlow == eRender)
 	{
 		hr = m_pEventClient->GetMixFormat(&pDeviceFormat);
 		if (FAILED(hr)) return hr;
@@ -219,7 +233,7 @@ HRESULT WasapiSource::Pin::OnThreadDestroy()
 {
 	HRESULT hr = m_pAudioClient->Stop();
 
-	if (!m_Loopback) return hr;
+	if (m_eDataFlow == eCapture) return hr;
 
 	HRESULT hr2 = m_pEventClient->Stop();
 	if (FAILED(hr2)) return hr;
@@ -232,7 +246,7 @@ HRESULT WasapiSource::Pin::OnThreadStartPlay()
 	HRESULT hr = m_pAudioClient->Start();
 	if (FAILED(hr)) return hr;
 
-	if (!m_Loopback) return S_OK;
+	if (m_eDataFlow == eCapture) return S_OK;
 
 	hr = m_pEventClient->Start();
 	if (FAILED(hr))

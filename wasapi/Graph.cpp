@@ -62,6 +62,13 @@ Filter Graph::AddSourceFilter(const wstring& fileName, const wstring& filterName
 	return AddSourceFilter(fileName.c_str(), filterName.c_str());
 }
 
+Graph::iterator Graph::begin()
+{
+	iterator result;
+	EX(graphBuilder->EnumFilters(result.init()));
+	return ++result;
+}
+
 void Graph::Connect(Pin& pinOut, Pin& pinIn)
 {
 	EX(graphBuilder->Connect(pinOut, pinIn));
@@ -75,6 +82,11 @@ void Graph::ConnectDirect(Pin& pinOut, Pin& pinIn)
 void Graph::Disconnect(Pin& pin)
 {
 	EX(graphBuilder->Disconnect(pin));
+}
+
+Graph::iterator Graph::end()
+{
+	return iterator();
 }
 
 long Graph::GetEvent()

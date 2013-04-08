@@ -6,6 +6,10 @@ using namespace COM;
 using namespace DirectShow;
 using namespace std;
 
+Filter::Filter()
+{
+}
+
 Filter::Filter(const IID& clsid)
 {
 	EX(baseFilter.CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER));
@@ -30,11 +34,39 @@ Filter::Filter(IBaseFilter* ptr) :
 {
 }
 
+Filter::iterator Filter::begin()
+{
+	iterator result;
+	EX(baseFilter->EnumPins(result.init()));
+	return ++result;
+}
+
+Filter::iterator Filter::end()
+{
+	return iterator();
+}
+
 Pin Filter::FindPin(LPCWSTR name)
 {
 	CComPtr<IPin> ptr;
 	EX(baseFilter->FindPin(name, &ptr));
 	return Pin(ptr);
+}
+
+Pin Filter::In(unsigned int index)
+{
+	++index;
+	for (iterator i = begin(); i != end(); ++i)
+		if (i->QueryDirection() == PINDIR_INPUT && --index == 0) return *i;
+	throw out_of_range("Filter::In out of range.\n" CONTEXT);
+}
+
+Pin Filter::Out(unsigned int index)
+{
+	++index;
+	for (iterator i = begin(); i != end(); ++i)
+		if (i->QueryDirection() == PINDIR_OUTPUT && --index == 0) return *i;
+	throw out_of_range("Filter::Out out of range.\n" CONTEXT);
 }
 
 Pin Filter::FindPin(const wstring& name)
@@ -52,6 +84,16 @@ Filter::operator const IBaseFilter*() const
 	return baseFilter;
 }
 
+Pin Filter::operator [](const wstring& name)
+{
+	return FindPin(name.c_str());
+}
+
+Pin Filter::operator [](LPCWSTR name)
+{
+	return FindPin(name);
+}
+
 /*Pin Filter::operator [](unsigned int index)
 {
 	CComPtr<IEnumPins> enumPins;
@@ -60,20 +102,11 @@ Filter::operator const IBaseFilter*() const
 	index++;
 	while (index > 0)
 	{
+		ptr.Release();
 		index--;
-		if (enumPins->Next(1, &ptr, NULL) != S_OK)
-			throw out_of_range(
-
+		HRESULT hr = enumPins->Next(1, &ptr, NULL);
+		if (EX(hr) != S_OK)
+			throw out_of_range("EnumPins out of range.\n" CONTEXT);
 	}
-	for (; index >= 0; index--, ) enumPins->Next(1, 
+	return Pin(ptr);
 }*/
-
-Pin Filter::operator [](LPCWSTR name)
-{
-	return FindPin(name);
-}
-
-Pin Filter::operator [](const wstring& name)
-{
-	return FindPin(name.c_str());
-}

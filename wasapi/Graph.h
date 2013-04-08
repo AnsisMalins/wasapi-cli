@@ -1,4 +1,5 @@
 #pragma once
+#include "com_iterator.h"
 #include "Filter.h"
 
 namespace DirectShow
@@ -6,6 +7,7 @@ namespace DirectShow
 	class Graph
 	{
 	public:
+		typedef COM::com_iterator<Filter, IBaseFilter, IEnumFilters> iterator;
 		Graph(const IID& clsid, bool addToRot);
 		~Graph();
 		void Abort();
@@ -15,9 +17,11 @@ namespace DirectShow
 		Filter AddSourceFilter(LPCWSTR fileName, const std::wstring& filterName);
 		Filter AddSourceFilter(const std::wstring& fileName, LPCWSTR filterName);
 		Filter AddSourceFilter(const std::wstring& fileName, const std::wstring& filterName);
+		iterator begin();
 		void Connect(Pin& pinOut, Pin& pinIn);
 		void ConnectDirect(Pin& pinOut, Pin& pinIn);
 		void Disconnect(Pin& pin);
+		iterator end();
 		Filter FindFilter(LPCWSTR name);
 		Filter FindFilter(const std::wstring& name);
 		long GetEvent();
@@ -37,8 +41,8 @@ namespace DirectShow
 		operator const IGraphBuilder*() const;
 		operator IMediaControl*();
 		operator const IMediaControl*() const;
-		Filter operator [](LPCWSTR name);
 		Filter operator [](const std::wstring& name);
+		Filter operator [](LPCWSTR name);
 	private:
 		CComPtr<IGraphBuilder> graphBuilder;
 		CComPtr<IMediaControl> mediaControl;

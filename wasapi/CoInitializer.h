@@ -7,5 +7,7 @@ namespace COM
 	public:
 		CoInitializer(DWORD dwCoInit);
 		~CoInitializer();
+	private:
+		CoInitializer(const CoInitializer& co);
 	};
 }
