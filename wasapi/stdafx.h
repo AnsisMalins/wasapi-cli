@@ -38,4 +38,4 @@
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
-#define CONTEXT (__FILE__ ":" STR(__LINE__) " " )
+#define CONTEXT (__FILEW__ L":" _STR2WSTR(STR(__LINE__)) L" " __FUNCTIONW__)

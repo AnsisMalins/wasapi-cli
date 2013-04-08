@@ -40,6 +40,7 @@
       <Filter>COM</Filter>
     </ClCompile>
     <ClCompile Include="wexception.cpp" />
+    <ClCompile Include="win_exception.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -81,6 +82,8 @@
     </ClInclude>
     <ClInclude Include="Const.h" />
     <ClInclude Include="wexception.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="win_exception.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectShow">

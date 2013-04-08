@@ -3,17 +3,14 @@
 
 namespace COM
 {
-	class com_exception : public std::exception
+	class com_exception : public wexception
 	{
 	public:
-		com_exception(const char* what_arg, HRESULT hr);
-		com_exception(const std::string& what_arg, HRESULT hr);
-		HRESULT hr() const throw();
-		virtual const char* what() const;
+		com_exception(const wchar_t*, HRESULT hr);
+		HRESULT hr() const;
 	private:
-		std::string _what;
 		HRESULT _hr;
 	};
 }
 
-HRESULT throw_on_error(HRESULT hr, const char* context);
+HRESULT throw_on_error(HRESULT hr, const wchar_t* context);

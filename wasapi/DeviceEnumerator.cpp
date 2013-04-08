@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DeviceEnumerator.h"
-#include "wexception.h"
+#include "com_exception.h"
 
 using namespace COM;
 using namespace std;

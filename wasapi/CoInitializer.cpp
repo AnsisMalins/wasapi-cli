@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "CoInitializer.h"
-#include "wexception.h"
+#include "com_exception.h"
 
 using namespace COM;
 

@@ -3,46 +3,25 @@
 
 using namespace std;
 
-wstring& wexception::trace()
+wexception::wexception(const wchar_t* message) :
+	_wwhat(message)
 {
-	return _trace;
+}
+
+void wexception::add_context(const wchar_t* context)
+{
+	wostringstream str;
+	str << _wwhat << endl << context;
+	_wwhat = str.str();
+	_what = string(_wwhat.begin(), _wwhat.end());
 }
 
 const char* wexception::what() const
 {
-	//_trace.append(L" ");
-	
-	return NULL;
+	return _what.c_str();
 }
 
 const wchar_t* wexception::wwhat() const
 {
-	return NULL;
-}
-
-
-win_exception::win_exception(DWORD err) :
-	_err(err)
-{
-	LPWSTR errMsg;
-	DWORD errLen = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER,
-		NULL, err, LANG_NEUTRAL, (LPWSTR)&errMsg, 0, NULL);
-
-}
-
-
-BOOL throw_on_error(BOOL success, const char* context)
-{
-	if (success) return success;
-	wostringstream what;
-	DWORD err = GetLastError();
-	LPWSTR errMsg;
-	DWORD errLen = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER,
-		NULL, err, LANG_NEUTRAL, (LPWSTR)&errMsg, 0, NULL);
-	if (errLen > 0) what << errMsg;
-	else what << "err " << err;
-	what << " in " << context;
-	wstring what_str = what.str();
-	win_exception ex(err);
-	throw ex;
+	return _wwhat.c_str();
 }

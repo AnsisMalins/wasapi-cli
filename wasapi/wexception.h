@@ -1,23 +1,15 @@
 #pragma once
 
-#define EX(x) (throw_on_error((x), CONTEXT))
-BOOL throw_on_error(BOOL success, const char* context);
-
 class wexception : public std::exception
 {
 public:
-	std::wstring& trace();
+	wexception(const wchar_t* message);
+	void add_context(const wchar_t* context);
 	virtual const char* what() const;
 	virtual const wchar_t* wwhat() const;
 private:
-	std::wstring _trace;
+	std::string _what;
+	std::wstring _wwhat;
 };
 
-class win_exception : public wexception
-{
-public:
-	win_exception(DWORD err);
-	DWORD err() const;
-private:
-	DWORD _err;
-};
+#define EX(x) (throw_on_error((x), CONTEXT))

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PropertyStore.h"
-#include "wexception.h"
+#include "com_exception.h"
 
 using namespace COM;
 
