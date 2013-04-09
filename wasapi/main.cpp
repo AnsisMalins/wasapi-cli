@@ -29,6 +29,7 @@ void Main(const vector<wstring>& args)
 	Graph graph(CLSID_FilterGraph, true);
 
 	vector<wstring>::const_iterator arg = args.begin();
+	++arg;
 
 	if (arg == args.end() || *arg == L"/?" || *arg == L"--help")
 	{
@@ -77,11 +78,7 @@ void Main(const vector<wstring>& args)
 	{
 		Filter newFilter;
 		wstring filterName;
-		if (*arg == L"!")
-		{
-			next_arg(args, arg);
-		}
-		else if (*arg == L"filesink")
+		if (*arg == L"filesink")
 		{
 			throw invalid_argument("stdsink is not implemented yet\n" CONTEXT);
 		}
@@ -97,20 +94,43 @@ void Main(const vector<wstring>& args)
 			wcout << graph.ToString();
 			return;
 		}
+		else if (*arg == L"render")
+		{
+			graph.Render(curFilter.Out(0));
+			wcout << graph.ToString();
+			break;
+		}
 		else if (*arg == L"rtpsink")
 		{
 			throw invalid_argument("rtpsink is not implemented yet\n" CONTEXT);
 		}
 		else if (*arg == L"rtpsrc")
 		{
-			throw invalid_argument("rtpsrc is not implemented yet\n" CONTEXT);
+			wstring lipwstr = next_arg(args, arg);
+			if (lipwstr == L"!") throw invalid_argument("need localip");
+			wstring ripwstr = next_arg(args, arg);
+			if (ripwstr == L"!") throw invalid_argument("need remoteip");
+			wstring portwstr = next_arg(args, arg);
+			if (portwstr == L"!") throw invalid_argument("need port");
+			string lipstr(lipwstr.begin(), lipwstr.end());
+			DWORD localIP = inet_addr(lipstr.c_str());
+			string ripstr(ripwstr.begin(), ripwstr.end());
+			DWORD remoteIP = inet_addr(ripstr.c_str());
+			string portstr(portwstr.begin(), portwstr.end());
+			int port = atoi(portstr.c_str());
+			HRESULT hr = S_OK;
+			CComPtr<CNetworkReceiverFilter> rtpsrc =
+				new CNetworkReceiverFilter(NAME("CNetworkReceiverFilter"), NULL, &hr);
+			EX(hr);
+			EX(rtpsrc->SetNetworkInterface(localIP));
+			EX(rtpsrc->SetMulticastGroup(remoteIP, port));
+			newFilter = Filter(rtpsrc);
+			filterName = L"rtpsrc";
 		}
 		else if (*arg == L"stdsink")
 		{
-			wstring filterName = next_arg(args, arg);
-			if (filterName == L"!") filterName = L"stdsink";
-			HRESULT hr;
-			Filter filter(new StdoutRenderer(&hr));
+			HRESULT hr = S_OK;
+			newFilter = Filter(new StdoutRenderer(&hr));
 			EX(hr);
 			filterName = L"stdsink";
 		}
@@ -152,16 +172,28 @@ void Main(const vector<wstring>& args)
 				Device device;
 				id = wasapi.GetDefaultDevice(dataFlow, role).GetId();
 			}
-			HRESULT hr;
+			HRESULT hr = S_OK;
 			newFilter = Filter(new WasapiSource(id.c_str(), &hr));
 			EX(hr);
 			filterName = L"wasapisrc";
 		}
+		else
+		{
+			wostringstream str;
+			str << "unknown command: " << *arg << "\n" CONTEXT;
+			wstring what = str.str();
+			throw invalid_argument(string(what.begin(), what.end()));
+		}
 
 		if (newFilter != NULL && arg != args.end() && *arg != L"!")
 		{
-			filterName = next_arg(args, arg);
-			while (arg != args.end() && next_arg(args, arg) != L"!") ;
+			wstring tmp = next_arg(args, arg);
+			if (tmp != L"!")
+			{
+				filterName = next_arg(args, arg);
+				if (next_arg(args, arg) != L"!")
+					throw invalid_argument("\"!\" expected\n" CONTEXT);
+			}
 		}
 		if (newFilter != NULL)
 		{
@@ -170,8 +202,9 @@ void Main(const vector<wstring>& args)
 				graph.Connect(curFilter.Out(0), newFilter.In(0));
 		}
 		curFilter = newFilter;
+		next_arg(args, arg);
 	}
-
+	
 	graph.Run();
 	WaitForCompletion(graph);
 	graph.Stop();
@@ -180,7 +213,8 @@ void Main(const vector<wstring>& args)
 wstring next_arg(const vector<wstring>& args,
 	vector<wstring>::const_iterator& arg)
 {
-	return ++arg != args.end() ? *arg : L"!";
+	if (arg != args.end()) ++arg;
+	return arg != args.end() ? *arg : L"!";
 }
 
 void on_sigint(int sigint)
@@ -210,10 +244,11 @@ int wmain(int argc, wchar_t** argv)
 		args.push_back(wstring(L""));
 
 		args.push_back(wstring(L"wasapisrc"));
+		args.push_back(wstring(L"eRender"));
 
 		args.push_back(wstring(L"!"));
 
-		args.push_back(wstring(L"wasapisink"));
+		args.push_back(wstring(L"stdsink"));
 
 		args.push_back(wstring(L"!"));
 		
@@ -234,8 +269,7 @@ int wmain(int argc, wchar_t** argv)
 		result = 1;
 	}
 #ifdef _DEBUG
-	WCHAR dummy;
-	wcin.getline(&dummy, 1);
+	WaitForSingleObject(hSigint, INFINITE);
 #endif
 	return result;
 }

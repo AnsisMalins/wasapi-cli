@@ -41,7 +41,7 @@ namespace COM
 		}
 		bool operator !=(const com_iterator& it) const
 		{
-			return begin == it.begin && unk != it.unk;
+			return begin != it.begin || unk != it.unk;
 		}
 		T& operator *()
 		{

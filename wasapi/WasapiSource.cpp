@@ -58,7 +58,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 		return;
 	}
 
-	if (m_eDataFlow = eCapture) return;
+	if (m_eDataFlow == eCapture) return;
 
 	hr = pDevice->Activate(
 		__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_pEventClient);
