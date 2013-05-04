@@ -14,11 +14,6 @@
 // DirectShow
 #include <dshow.h>
 
-// DSNetwork
-#include <dsnetifc.h>
-#include <dsrecv.h>
-#include <dssend.h>
-
 // STL
 #include <csignal>
 #include <exception>

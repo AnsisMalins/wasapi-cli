@@ -11,7 +11,7 @@ WasapiSource::WasapiSource(LPCWSTR id, HRESULT* phr) :
 }
 
 WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
-	CSourceStream(NAME("Capture"), phr, pms, L"1"),
+	CSourceStream(NAME("WasapiSource::Pin"), phr, pms, L"1"),
 	m_hBufferReady(NULL),
 	m_Initialized(FALSE),
 	m_rtPrevious(0)
@@ -87,7 +87,7 @@ HRESULT WasapiSource::Pin::CheckMediaType(const CMediaType* pMediaType)
 HRESULT WasapiSource::Pin::DecideBufferSize(
 	IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* ppropInputRequest)
 {
-	if (ppropInputRequest == NULL) return E_POINTER;
+	if (pAlloc == NULL || ppropInputRequest == NULL) return E_POINTER;
 
 	HRESULT hr = Initialize();
 	if (FAILED(hr)) return hr;
@@ -104,13 +104,15 @@ HRESULT WasapiSource::Pin::DecideBufferSize(
 	hr = pAlloc->SetProperties(ppropInputRequest, &actual);
 	if (FAILED(hr)) return hr;
 
-	if (actual.cbBuffer < cbBuffer) return E_FAIL;
+	if (actual.cbBuffer < cbBuffer || actual.cBuffers < 2) return E_FAIL;
 
 	return S_OK;
 }
 
 HRESULT WasapiSource::Pin::FillBuffer(IMediaSample* pSample)
 {
+	if (pSample == NULL) return E_POINTER;
+
 	WaitForSingleObject(m_hBufferReady, INFINITE);
 
 	BYTE* pbSample;

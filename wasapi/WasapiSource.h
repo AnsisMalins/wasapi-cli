@@ -8,7 +8,7 @@ namespace DirectShow
 	public:
 		WasapiSource(LPCWSTR id, HRESULT* phr);
 	private:
-		class Pin : CSourceStream
+		class Pin : public CSourceStream
 		{
 		public:
 			Pin(CSource* pms, LPCWSTR id, HRESULT* phr);

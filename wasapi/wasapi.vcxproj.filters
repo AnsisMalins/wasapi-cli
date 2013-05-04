@@ -41,6 +41,9 @@
     </ClCompile>
     <ClCompile Include="wexception.cpp" />
     <ClCompile Include="win_exception.cpp" />
+    <ClCompile Include="RtpSource.cpp">
+      <Filter>DirectShow\Filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -84,6 +87,9 @@
     <ClInclude Include="win_exception.h" />
     <ClInclude Include="com_iterator.h">
       <Filter>COM</Filter>
+    </ClInclude>
+    <ClInclude Include="RtpSource.h">
+      <Filter>DirectShow\Filters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

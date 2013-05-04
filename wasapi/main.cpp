@@ -3,6 +3,7 @@
 #include "CoInitializer.h"
 #include "DeviceEnumerator.h"
 #include "Graph.h"
+#include "RtpSource.h"
 #include "StdoutRenderer.h"
 #include "WasapiSource.h"
 
@@ -34,13 +35,10 @@ void Main(const vector<wstring>& args)
 	if (arg == args.end() || *arg == L"/?" || *arg == L"--help")
 	{
 		cout << "Usage:" << endl
-			<< "-si  --stdin" << endl
-			<< "-so  --stdout" << endl
-			<< "-nr  --netrecv <address> <address> <port>" << endl
-			<< "-ns  --netsend <address> <address> <port>" << endl
-			<< "-wa  --wasapi (<id>|<default>) <loopback>" << endl
-			<< "-fs  --fsource <url>" << endl
-			<< "-ci  --clsid <clsid>" << endl;
+			<< "wasapi <source> ! [<transform> !] ... <sink>" << endl
+			<< "source    = filesrc | rtpsrc | wasapisrc" << endl
+			<< "transform = not yet implemented" << endl
+			<< "sink      = stdsink | wasapisink" << endl;
 		return;
 	}
 	else if (*arg == L"-l")
@@ -80,7 +78,7 @@ void Main(const vector<wstring>& args)
 		wstring filterName;
 		if (*arg == L"filesink")
 		{
-			throw invalid_argument("stdsink is not implemented yet\n" CONTEXT);
+			throw invalid_argument("filesink is not implemented yet\n" CONTEXT);
 		}
 		else if (*arg == L"filesrc")
 		{
@@ -108,22 +106,17 @@ void Main(const vector<wstring>& args)
 		{
 			wstring lipwstr = next_arg(args, arg);
 			if (lipwstr == L"!") throw invalid_argument("need localip");
-			wstring ripwstr = next_arg(args, arg);
-			if (ripwstr == L"!") throw invalid_argument("need remoteip");
 			wstring portwstr = next_arg(args, arg);
 			if (portwstr == L"!") throw invalid_argument("need port");
 			string lipstr(lipwstr.begin(), lipwstr.end());
-			DWORD localIP = inet_addr(lipstr.c_str());
-			string ripstr(ripwstr.begin(), ripwstr.end());
-			DWORD remoteIP = inet_addr(ripstr.c_str());
-			string portstr(portwstr.begin(), portwstr.end());
-			int port = atoi(portstr.c_str());
+			IN_ADDR localIP;
+			localIP.S_un.S_addr = inet_addr(lipstr.c_str());
+			int port = _wtoi(portwstr.c_str());
+			if (port < 1 || port > 65535) throw invalid_argument("invalid port");
+			SOCKADDR_IN localEP = { AF_INET, port, localIP };
 			HRESULT hr = S_OK;
-			CComPtr<CNetworkReceiverFilter> rtpsrc =
-				new CNetworkReceiverFilter(NAME("CNetworkReceiverFilter"), NULL, &hr);
+			CComPtr<RtpSource> rtpsrc = new RtpSource(localEP, &hr);
 			EX(hr);
-			EX(rtpsrc->SetNetworkInterface(localIP));
-			EX(rtpsrc->SetMulticastGroup(remoteIP, port));
 			newFilter = Filter(rtpsrc);
 			filterName = L"rtpsrc";
 		}
@@ -145,7 +138,9 @@ void Main(const vector<wstring>& args)
 			Device device;
 			if (id == L"eCommunications")
 				device = wasapi.GetDefaultDevice(eRender, eCommunications);
-			else if (id == L"eMultimedia" || id == L"!")
+			else if (id == L"eConsole" || id == L"!")
+				device = wasapi.GetDefaultDevice(eRender, eConsole);
+			else if (id == L"eMultimedia")
 				device = wasapi.GetDefaultDevice(eRender, eMultimedia);
 			else
 				device = wasapi.GetDevice(id);
@@ -165,8 +160,8 @@ void Main(const vector<wstring>& args)
 				if (id != L"!") id = next_arg(args, arg);
 				ERole role;
 				if (id == L"eCommunications") role = eCommunications;
-				if (id == L"eConsole") role = eConsole;
-				else if (id == L"eMultimedia" || id == L"!") role = eMultimedia;
+				else if (id == L"eConsole" || id == L"!") role = eConsole;
+				else if (id == L"eMultimedia") role = eMultimedia;
 				else throw invalid_argument("wasapisrc: Invalid ERole\n" CONTEXT);
 				DeviceEnumerator wasapi;
 				Device device;
@@ -243,12 +238,13 @@ int wmain(int argc, wchar_t** argv)
 #ifdef _DEBUG
 		args.push_back(wstring(L""));
 
-		args.push_back(wstring(L"wasapisrc"));
-		args.push_back(wstring(L"eRender"));
+		args.push_back(wstring(L"rtpsrc"));
+		args.push_back(wstring(L"192.168.0.70"));
+		args.push_back(wstring(L"5004"));
 
 		args.push_back(wstring(L"!"));
 
-		args.push_back(wstring(L"stdsink"));
+		args.push_back(wstring(L"wasapisink"));
 
 		args.push_back(wstring(L"!"));
 		
