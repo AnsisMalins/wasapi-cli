@@ -98,7 +98,7 @@
       <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -121,7 +121,7 @@
       <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbasd.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
@@ -141,7 +141,7 @@
       <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -166,7 +166,7 @@
       <AdditionalIncludeDirectories>..\baseclasses;..\dsnet</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dsnet.lib;quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
+      <AdditionalDependencies>quartz.lib;strmbase.lib;ws2_32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

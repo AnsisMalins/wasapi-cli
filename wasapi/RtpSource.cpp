@@ -11,10 +11,7 @@ RtpSource::RtpSource(SOCKADDR_IN localEP, HRESULT* phr) :
 
 RtpSource::Pin::Pin(CSource* pms, SOCKADDR_IN localEP, HRESULT* phr) :
 	CSourceStream(NAME("RtpSource::Pin"), phr, pms, L"1"),
-	m_llMediaTime(0),
-	m_localEP(localEP),
-	m_rtTime(0),
-	m_Socket(NULL)
+	m_localEP(localEP)
 {
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) *phr = E_UNEXPECTED;
@@ -25,14 +22,14 @@ HRESULT RtpSource::Pin::DecideBufferSize(
 {
 	if (pAlloc == NULL || ppropInputRequest == NULL) return E_POINTER;
 
-	ppropInputRequest->cbBuffer = max(ppropInputRequest->cbBuffer, 8992);
+	ppropInputRequest->cbBuffer = max(ppropInputRequest->cbBuffer, 2048);
 	ppropInputRequest->cBuffers = max(ppropInputRequest->cBuffers, 2);
 
 	ALLOCATOR_PROPERTIES actual;
 	HRESULT hr = pAlloc->SetProperties(ppropInputRequest, &actual);
 	if (FAILED(hr)) return hr;
 
-	if (actual.cbBuffer < 1492 || actual.cBuffers < 2) return E_FAIL;
+	if (actual.cbBuffer < 2048 || actual.cBuffers < 2) return E_FAIL;
 
 	return S_OK;
 }
@@ -47,31 +44,34 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 
 	long cbSize = pSample->GetSize();
 
-	sockaddr from;
-	int fromlen;
+	hr = pSample->SetActualDataLength(0);
+	if (FAILED(hr)) return hr;
+
+	SOCKADDR_IN from;
+	int fromlen = sizeof(SOCKADDR_IN);
 	long cbActual = recvfrom(m_Socket,
-		(char*)pBuffer, cbSize, 0, &from, &fromlen);
+		(char*)pBuffer, cbSize, 0, (SOCKADDR*)&from, &fromlen);
 	if (cbActual == SOCKET_ERROR)
 	{
-		pSample->SetActualDataLength(0);
-		switch (WSAGetLastError())
+		int wserr = WSAGetLastError();
+		switch (wserr)
 		{
 		case WSAEINTR: return S_FALSE;
-		case WSAESHUTDOWN: return S_FALSE;
 		case WSAEMSGSIZE: return VFW_E_BUFFER_OVERFLOW;
+		case WSAESHUTDOWN: return S_FALSE;
 		default: return E_UNEXPECTED;
 		}
 	}
 
 	int cbHeader = 12;
 	if (cbActual < cbHeader) return E_FAIL;
-	int version = pBuffer[0] & 0x3;
+	int version = (pBuffer[0] & 0xc0) >> 6;
 	if (version != 2) return E_FAIL;
-	BOOL padding = pBuffer[0] & 0x4;
-	BOOL extension = pBuffer[0] & 0x8;
-	int nCsrc = pBuffer[0] >> 4;
-	bool marker = pBuffer[1] & 0x1;
-	int payloadType = pBuffer[1] >> 1;
+	BOOL padding = pBuffer[0] & 0x20;
+	BOOL extension = pBuffer[0] & 0x10;
+	int nCsrc = pBuffer[0] & 0x0f;
+	BOOL marker = pBuffer[1] & 0x80;
+	int payloadType = pBuffer[1] & 0x7f;
 	int sequenceNumber = ntohs(*(u_short*)(pBuffer + 2));
 	u_long timestamp = ntohl(*(u_long*)(pBuffer + 4));
 	u_long ssrc = ntohl(*(u_long*)(pBuffer + 8));
@@ -106,17 +106,21 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 	hr = pSample->SetActualDataLength(cbActual);
 	if (FAILED(hr)) return hr;
 
-	// The following section causes a deadlock.
-	/*LONGLONG llMediaTimeEnd = m_llMediaTime + cbActual / 4;
+	// Not sure if this is the correct way to do this.
+	LONGLONG llMediaTimeEnd = m_llMediaTime + cbActual / 4;
 	hr = pSample->SetMediaTime(&m_llMediaTime, &llMediaTimeEnd);
 	if (FAILED(hr)) return hr;
 
-	REFERENCE_TIME rtEnd = timestamp;
-	hr = pSample->SetTime(&m_rtTime, &rtEnd);
-	if (FAILED(hr)) return hr;
+	if (m_nPacketsReceived > 0)
+	{
+		REFERENCE_TIME rtEnd = timestamp;
+		hr = pSample->SetTime(&m_rtTime, &rtEnd);
+		if (FAILED(hr)) return hr;
+	}
 
 	m_llMediaTime = llMediaTimeEnd;
-	m_rtTime = rtEnd;*/
+	m_nPacketsReceived++;
+	m_rtTime = timestamp;
 
 	return S_OK;
 }
@@ -150,11 +154,15 @@ HRESULT RtpSource::Pin::OnThreadStartPlay()
 	m_Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (m_Socket == INVALID_SOCKET) return E_UNEXPECTED;
 
+	char reuseaddr = 1;
 	if (setsockopt(m_Socket, SOL_SOCKET, SO_REUSEADDR,
-		(char*)TRUE, sizeof(TRUE))) return E_UNEXPECTED;
+		&reuseaddr, sizeof(reuseaddr))) return E_UNEXPECTED;
 
 	if (bind(m_Socket, (SOCKADDR*)&m_localEP, sizeof(m_localEP)))
 		return E_FAIL;
+
+	m_llMediaTime = 0;
+	m_nPacketsReceived = 0;
 
 	return S_OK;
 }

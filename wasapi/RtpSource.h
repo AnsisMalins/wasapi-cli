@@ -20,6 +20,7 @@ namespace DirectShow
 		private:
 			LONGLONG m_llMediaTime;
 			SOCKADDR_IN m_localEP;
+			UINT m_nPacketsReceived;
 			REFERENCE_TIME m_rtTime;
 			SOCKET m_Socket;
 		};

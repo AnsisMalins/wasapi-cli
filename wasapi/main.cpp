@@ -35,10 +35,9 @@ void Main(const vector<wstring>& args)
 	if (arg == args.end() || *arg == L"/?" || *arg == L"--help")
 	{
 		cout << "Usage:" << endl
-			<< "wasapi <source> ! [<transform> !] ... <sink>" << endl
-			<< "source    = filesrc | rtpsrc | wasapisrc" << endl
-			<< "transform = not yet implemented" << endl
-			<< "sink      = stdsink | wasapisink" << endl;
+			<< "wasapi <source> ! <sink>" << endl
+			<< "source = filesrc | rtpsrc | wasapisrc" << endl
+			<< "sink   = stdsink | wasapisink" << endl;
 		return;
 	}
 	else if (*arg == L"-l")
@@ -109,11 +108,10 @@ void Main(const vector<wstring>& args)
 			wstring portwstr = next_arg(args, arg);
 			if (portwstr == L"!") throw invalid_argument("need port");
 			string lipstr(lipwstr.begin(), lipwstr.end());
-			IN_ADDR localIP;
-			localIP.S_un.S_addr = inet_addr(lipstr.c_str());
-			int port = _wtoi(portwstr.c_str());
-			if (port < 1 || port > 65535) throw invalid_argument("invalid port");
-			SOCKADDR_IN localEP = { AF_INET, port, localIP };
+			SOCKADDR_IN localEP;
+			localEP.sin_family = AF_INET;
+			localEP.sin_addr.s_addr = inet_addr(lipstr.c_str());
+			localEP.sin_port = htons(_wtoi(portwstr.c_str()));
 			HRESULT hr = S_OK;
 			CComPtr<RtpSource> rtpsrc = new RtpSource(localEP, &hr);
 			EX(hr);
@@ -246,9 +244,9 @@ int wmain(int argc, wchar_t** argv)
 
 		args.push_back(wstring(L"wasapisink"));
 
-		args.push_back(wstring(L"!"));
+		/*args.push_back(wstring(L"!"));
 		
-		args.push_back(wstring(L"print"));
+		args.push_back(wstring(L"print"));*/
 #else
 		for (int i = 0; i < argc; i++) args.push_back(wstring(argv[i]));
 #endif
