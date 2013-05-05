@@ -3,6 +3,7 @@
 #include "CoInitializer.h"
 #include "DeviceEnumerator.h"
 #include "Graph.h"
+#include "RtpRenderer.h"
 #include "RtpSource.h"
 #include "StdoutRenderer.h"
 #include "WasapiSource.h"
@@ -99,7 +100,25 @@ void Main(const vector<wstring>& args)
 		}
 		else if (*arg == L"rtpsink")
 		{
-			throw invalid_argument("rtpsink is not implemented yet\n" CONTEXT);
+			wstring lipwstr = next_arg(args, arg);
+			if (lipwstr == L"!") throw invalid_argument("rtpsink needs local IP");
+			wstring ripwstr = next_arg(args, arg);
+			if (ripwstr == L"!") throw invalid_argument("rtpsink needs remote IP");
+			wstring rportwstr = next_arg(args, arg);
+			if (rportwstr == L"!") throw invalid_argument("rtpsink needs remote port");
+			string lipstr(lipwstr.begin(), lipwstr.end());
+			IN_ADDR localIP;
+			localIP.s_addr = inet_addr(lipstr.c_str());
+			string ripstr(ripwstr.begin(), ripwstr.end());
+			IN_ADDR remoteIP;
+			remoteIP.s_addr = inet_addr(ripstr.c_str());
+			USHORT remotePort = _wtoi(rportwstr.c_str());
+			SOCKADDR_IN remoteEP = { AF_INET, htons(remotePort), remoteIP };
+			HRESULT hr = S_OK;
+			CComPtr<RtpRenderer> rtpsink = new RtpRenderer(localIP, remoteEP, &hr);
+			EX(hr);
+			newFilter = Filter(rtpsink);
+			filterName = L"rtpsink";
 		}
 		else if (*arg == L"rtpsrc")
 		{
@@ -192,7 +211,7 @@ void Main(const vector<wstring>& args)
 		{
 			graph.AddFilter(newFilter, filterName);
 			if (curFilter != NULL)
-				graph.Connect(curFilter.Out(0), newFilter.In(0));
+				graph.ConnectDirect(curFilter.Out(0), newFilter.In(0));
 		}
 		curFilter = newFilter;
 		next_arg(args, arg);
@@ -236,17 +255,15 @@ int wmain(int argc, wchar_t** argv)
 #ifdef _DEBUG
 		args.push_back(wstring(L""));
 
-		args.push_back(wstring(L"rtpsrc"));
-		args.push_back(wstring(L"192.168.0.70"));
-		args.push_back(wstring(L"5004"));
+		args.push_back(wstring(L"wasapisrc"));
+		args.push_back(wstring(L"eRender"));
 
 		args.push_back(wstring(L"!"));
 
-		args.push_back(wstring(L"wasapisink"));
-
-		/*args.push_back(wstring(L"!"));
-		
-		args.push_back(wstring(L"print"));*/
+		args.push_back(wstring(L"rtpsink"));
+		args.push_back(wstring(L"192.168.0.70"));
+		args.push_back(wstring(L"192.168.0.210"));
+		args.push_back(wstring(L"5004"));
 #else
 		for (int i = 0; i < argc; i++) args.push_back(wstring(argv[i]));
 #endif

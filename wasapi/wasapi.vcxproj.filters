@@ -44,6 +44,9 @@
     <ClCompile Include="RtpSource.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="RtpRenderer.cpp">
+      <Filter>DirectShow\Filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -89,6 +92,9 @@
       <Filter>COM</Filter>
     </ClInclude>
     <ClInclude Include="RtpSource.h">
+      <Filter>DirectShow\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="RtpRenderer.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
   </ItemGroup>

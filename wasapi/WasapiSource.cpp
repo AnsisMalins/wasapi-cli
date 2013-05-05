@@ -72,6 +72,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 HRESULT WasapiSource::Pin::CheckMediaType(const CMediaType* pMediaType)
 {
 	if (pMediaType == NULL) return E_POINTER;
+	if (pMediaType->FormatType() == NULL) return E_FAIL;
 	if (*pMediaType->FormatType() != FORMAT_WaveFormatEx) return E_FAIL;
 	if (pMediaType->Format() == NULL) return E_FAIL;
 

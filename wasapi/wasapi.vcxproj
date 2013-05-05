@@ -187,6 +187,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pin.cpp" />
     <ClCompile Include="PropertyStore.cpp" />
+    <ClCompile Include="RtpRenderer.cpp" />
     <ClCompile Include="RtpSource.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -211,6 +212,7 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Pin.h" />
     <ClInclude Include="PropertyStore.h" />
+    <ClInclude Include="RtpRenderer.h" />
     <ClInclude Include="RtpSource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdoutRenderer.h" />
