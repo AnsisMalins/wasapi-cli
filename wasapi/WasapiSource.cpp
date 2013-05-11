@@ -16,14 +16,20 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 	m_Initialized(FALSE),
 	m_rtPrevious(0)
 {
-	if (id == NULL && phr != NULL) *phr = E_POINTER;
+	if (phr != NULL && FAILED(*phr)) return;
+
+	if (id == NULL)
+	{
+		if (phr != NULL) *phr = E_POINTER;
+		return;
+	}
 
 	CComPtr<IMMDeviceEnumerator> pDeviceEnumerator;
 	HRESULT hr = pDeviceEnumerator.CoCreateInstance(
 		__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 
@@ -31,7 +37,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 	hr = pDeviceEnumerator->GetDevice(id, &pDevice);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 
@@ -39,14 +45,14 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 	hr = pDevice->QueryInterface(__uuidof(IMMEndpoint), (void**)&pEndpoint);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 
 	hr = pEndpoint->GetDataFlow(&m_eDataFlow);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 
@@ -54,7 +60,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 		__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_pAudioClient);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 
@@ -64,7 +70,7 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 		__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&m_pEventClient);
 	if (FAILED(hr))
 	{
-		*phr = hr;
+		if (phr != NULL) *phr = hr;
 		return;
 	}
 }
@@ -72,9 +78,9 @@ WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
 HRESULT WasapiSource::Pin::CheckMediaType(const CMediaType* pMediaType)
 {
 	if (pMediaType == NULL) return E_POINTER;
-	if (pMediaType->FormatType() == NULL) return E_FAIL;
+	if (pMediaType->FormatType() == NULL) return E_POINTER;
 	if (*pMediaType->FormatType() != FORMAT_WaveFormatEx) return E_FAIL;
-	if (pMediaType->Format() == NULL) return E_FAIL;
+	if (pMediaType->Format() == NULL) return E_POINTER;
 
 	WAVEFORMATEX* pClosestMatch = NULL;
 	HRESULT hr = m_pAudioClient->IsFormatSupported(
@@ -129,10 +135,10 @@ HRESULT WasapiSource::Pin::FillBuffer(IMediaSample* pSample)
 	if (FAILED(hr)) return hr;
 	
 	UINT32 cbClient = nClient * m_cbFrame;
-	if((long)cbClient > pSample->GetSize())
+	if(cbClient > (UINT32)pSample->GetSize())
 	{
 		m_pCaptureClient->ReleaseBuffer(0);
-		return E_FAIL;
+		return VFW_E_BUFFER_OVERFLOW;
 	}
 
 	if (dwFlags & AUDCLNT_BUFFERFLAGS_SILENT) memset(pbSample, 0, cbClient);
@@ -239,7 +245,7 @@ HRESULT WasapiSource::Pin::OnThreadDestroy()
 	if (m_eDataFlow == eCapture) return hr;
 
 	HRESULT hr2 = m_pEventClient->Stop();
-	if (FAILED(hr2)) return hr;
+	if (FAILED(hr2) && SUCCEEDED(hr)) return hr2;
 
 	return hr;
 }

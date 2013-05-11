@@ -12,14 +12,15 @@ RtpRenderer::RtpRenderer(IN_ADDR localIP, SOCKADDR_IN remoteEP, HRESULT* phr) :
 HRESULT RtpRenderer::CheckMediaType(const CMediaType* pMediaType)
 {
 	if (pMediaType == NULL) return E_POINTER;
-	if (pMediaType->FormatType() == NULL) return E_FAIL;
-	if (*pMediaType->FormatType() != FORMAT_WaveFormatEx) return E_FAIL;
-	if (pMediaType->Format() == NULL) return E_FAIL;
+	if (pMediaType->FormatType() == NULL) return E_POINTER;
+	if (*pMediaType->FormatType() != FORMAT_WaveFormatEx)
+		return VFW_E_TYPE_NOT_ACCEPTED;
+	if (pMediaType->Format() == NULL) return E_POINTER;
 	WAVEFORMATEX* pFormat = (WAVEFORMATEX*)pMediaType->Format();
-	if (pFormat->wFormatTag != WAVE_FORMAT_PCM) return E_FAIL;
-	if (pFormat->nChannels != 2) return E_FAIL;
-	if (pFormat->nSamplesPerSec != 44100) return E_FAIL;
-	if (pFormat->wBitsPerSample != 16) return E_FAIL;
+	if (pFormat->wFormatTag != WAVE_FORMAT_PCM) return VFW_E_TYPE_NOT_ACCEPTED;
+	if (pFormat->nChannels != 2) return VFW_E_TYPE_NOT_ACCEPTED;
+	if (pFormat->nSamplesPerSec != 44100) return VFW_E_TYPE_NOT_ACCEPTED;
+	if (pFormat->wBitsPerSample != 16) return VFW_E_TYPE_NOT_ACCEPTED;
 	return S_OK;
 }
 
@@ -31,7 +32,6 @@ HRESULT RtpRenderer::DoRenderSample(IMediaSample* pMediaSample)
 	HRESULT hr = pMediaSample->GetPointer(&pBuffer);
 	if (FAILED(hr)) return hr;
 
-	long cbSize = pMediaSample->GetSize();
 	long cbActual = pMediaSample->GetActualDataLength();
 
 	u_short* read = (u_short*)(pBuffer + cbActual - 2);
@@ -41,7 +41,7 @@ HRESULT RtpRenderer::DoRenderSample(IMediaSample* pMediaSample)
 
 	REFERENCE_TIME rtTime;
 	hr = pMediaSample->GetTime(NULL, &rtTime);
-	if (FAILED(hr)) return E_UNEXPECTED;
+	if (FAILED(hr)) return hr;
 
 	*(u_short*)pBuffer = 0x800a;
 	*(u_short*)(pBuffer + 2) = htons(m_nPacketsSent);

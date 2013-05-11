@@ -11,6 +11,6 @@ namespace DirectShow
 		HRESULT OnStartStreaming();
 		HRESULT OnStopStreaming();
 	private:
-		int stdoutMode;
+		int m_StdoutMode;
 	};
 }

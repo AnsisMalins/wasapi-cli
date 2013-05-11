@@ -18,8 +18,9 @@ namespace DirectShow
 			HRESULT GetMediaType(CMediaType* pMediaType);
 			HRESULT OnThreadStartPlay();
 		private:
+			SOCKADDR_IN m_epLocal;
+			u_short m_iPrevSeqNum;
 			LONGLONG m_llMediaTime;
-			SOCKADDR_IN m_localEP;
 			UINT m_nPacketsReceived;
 			REFERENCE_TIME m_rtTime;
 			SOCKET m_Socket;

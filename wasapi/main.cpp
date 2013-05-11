@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "AudioConverter.h"
 #include "com_exception.h"
 #include "CoInitializer.h"
 #include "DeviceEnumerator.h"
@@ -18,6 +19,8 @@ void Main(const vector<wstring>& args);
 wstring next_arg(const vector<wstring>& args,
 	vector<wstring>::const_iterator& arg);
 void on_sigint(int sig);
+WAVEFORMATEX wavefmt(WORD wFormatTag, WORD nChannels,
+	DWORD nSamplesPerSec, WORD wBitsPerSample);
 
 HANDLE hSigint;
 
@@ -38,7 +41,7 @@ void Main(const vector<wstring>& args)
 		cout << "Usage:" << endl
 			<< "wasapi <source> ! <sink>" << endl
 			<< "source = filesrc | rtpsrc | wasapisrc" << endl
-			<< "sink   = stdsink | wasapisink" << endl;
+			<< "sink   = rtpsink | stdsink | wasapisink" << endl;
 		return;
 	}
 	else if (*arg == L"-l")
@@ -76,7 +79,20 @@ void Main(const vector<wstring>& args)
 	{
 		Filter newFilter;
 		wstring filterName;
-		if (*arg == L"filesink")
+		if (*arg == L"audioconvert")
+		{
+			wstring formatStr = next_arg(args, arg);
+			if (formatStr == L"!") throw invalid_argument("audioconvert needs format");
+			WAVEFORMATEX format;
+			if (formatStr == L"s16le") format = wavefmt(WAVE_FORMAT_PCM, 2, 44100, 16);
+			else throw invalid_argument("audioconvert: format not supported");
+			HRESULT hr = S_OK;
+			CComPtr<AudioConverter> audioconvert = new AudioConverter(format, &hr);
+			EX(hr);
+			newFilter = Filter(audioconvert);
+			filterName = L"audioconvert";
+		}
+		else if (*arg == L"filesink")
 		{
 			throw invalid_argument("filesink is not implemented yet\n" CONTEXT);
 		}
@@ -256,14 +272,23 @@ int wmain(int argc, wchar_t** argv)
 		args.push_back(wstring(L""));
 
 		args.push_back(wstring(L"wasapisrc"));
-		args.push_back(wstring(L"eRender"));
+		args.push_back(wstring(L"eCapture"));
+
+		args.push_back(wstring(L"!"));
+
+		args.push_back(wstring(L"audioconvert"));
+		args.push_back(wstring(L"s16le"));
 
 		args.push_back(wstring(L"!"));
 
 		args.push_back(wstring(L"rtpsink"));
-		args.push_back(wstring(L"192.168.0.70"));
-		args.push_back(wstring(L"192.168.0.210"));
+		args.push_back(wstring(L"127.0.0.1"));
+		args.push_back(wstring(L"127.0.0.1"));
 		args.push_back(wstring(L"5004"));
+
+		args.push_back(wstring(L"!"));
+		args.push_back(wstring(L"print"));
+
 #else
 		for (int i = 0; i < argc; i++) args.push_back(wstring(argv[i]));
 #endif
@@ -283,4 +308,18 @@ int wmain(int argc, wchar_t** argv)
 	WaitForSingleObject(hSigint, INFINITE);
 #endif
 	return result;
+}
+
+WAVEFORMATEX wavefmt(WORD wFormatTag, WORD nChannels,
+	DWORD nSamplesPerSec, WORD wBitsPerSample)
+{
+	WAVEFORMATEX wf;
+	wf.wFormatTag = wFormatTag;
+	wf.nChannels = nChannels;
+	wf.nSamplesPerSec = nSamplesPerSec;
+	wf.wBitsPerSample = wBitsPerSample;
+	wf.nBlockAlign = wBitsPerSample / 8 * nChannels;
+	wf.nAvgBytesPerSec = wf.nBlockAlign * nSamplesPerSec;
+	wf.cbSize = 0;
+	return wf;
 }

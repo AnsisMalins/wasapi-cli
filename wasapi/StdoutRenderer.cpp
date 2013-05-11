@@ -21,25 +21,24 @@ HRESULT StdoutRenderer::DoRenderSample(IMediaSample* pMediaSample)
 	HRESULT hr = pMediaSample->GetPointer(&pBuffer);
 	if (hr != S_OK) return hr;
 
-	long length = pMediaSample->GetActualDataLength();
-	if (length < 0) return E_INVALIDARG;
+	long cbActual = pMediaSample->GetActualDataLength();
 
-	if ((long)fwrite(pBuffer, 1, length, stdout) < length) return E_FAIL;
+	if ((long)fwrite(pBuffer, 1, cbActual, stdout) < cbActual) return E_FAIL;
 
 	return S_OK;
 }
 
 HRESULT StdoutRenderer::OnStartStreaming()
 {
-	if (fflush(stdout) != 0) return E_FAIL;
-	stdoutMode = _setmode(_fileno(stdout), _O_BINARY);
-	if (stdoutMode == -1) return E_FAIL;
+	if (fflush(stdout)) return E_FAIL;
+	m_StdoutMode = _setmode(_fileno(stdout), _O_BINARY);
+	if (m_StdoutMode == -1) return E_FAIL;
 	return S_OK;
 }
 
 HRESULT StdoutRenderer::OnStopStreaming()
 {
-	if (fflush(stdout) != 0) return E_FAIL;
-	if (_setmode(_fileno(stdout), stdoutMode) == -1) return E_FAIL;
+	if (fflush(stdout)) return E_FAIL;
+	if (_setmode(_fileno(stdout), m_StdoutMode) == -1) return E_FAIL;
 	return S_OK;
 }

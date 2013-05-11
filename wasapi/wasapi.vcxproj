@@ -177,6 +177,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AudioClient.cpp" />
+    <ClCompile Include="AudioConverter.cpp" />
     <ClCompile Include="DeviceCollection.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="CoInitializer.cpp" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioClient.h" />
+    <ClInclude Include="AudioConverter.h" />
     <ClInclude Include="com_iterator.h" />
     <ClInclude Include="DeviceCollection.h" />
     <ClInclude Include="Filter.h" />

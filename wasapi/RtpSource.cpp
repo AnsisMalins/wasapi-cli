@@ -9,12 +9,18 @@ RtpSource::RtpSource(SOCKADDR_IN localEP, HRESULT* phr) :
 {
 }
 
-RtpSource::Pin::Pin(CSource* pms, SOCKADDR_IN localEP, HRESULT* phr) :
+RtpSource::Pin::Pin(CSource* pms, SOCKADDR_IN epLocal, HRESULT* phr) :
 	CSourceStream(NAME("RtpSource::Pin"), phr, pms, L"1"),
-	m_localEP(localEP)
+	m_epLocal(epLocal)
 {
+	if (phr != NULL && FAILED(*phr)) return;
+
 	WSADATA wsadata;
-	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) *phr = E_UNEXPECTED;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata))
+	{
+		if (phr != NULL) *phr = E_UNEXPECTED;
+		return;
+	}
 }
 
 HRESULT RtpSource::Pin::DecideBufferSize(
@@ -42,15 +48,13 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 	HRESULT hr = pSample->GetPointer(&pBuffer);
 	if (FAILED(hr)) return hr;
 
-	long cbSize = pSample->GetSize();
-
 	hr = pSample->SetActualDataLength(0);
 	if (FAILED(hr)) return hr;
 
 	SOCKADDR_IN from;
 	int fromlen = sizeof(SOCKADDR_IN);
-	long cbActual = recvfrom(m_Socket,
-		(char*)pBuffer, cbSize, 0, (SOCKADDR*)&from, &fromlen);
+	int cbActual = recvfrom(m_Socket,
+		(char*)pBuffer, pSample->GetSize(), 0, (SOCKADDR*)&from, &fromlen);
 	if (cbActual == SOCKET_ERROR)
 	{
 		int wserr = WSAGetLastError();
@@ -65,18 +69,18 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 
 	int cbHeader = 12;
 	if (cbActual < cbHeader) return E_FAIL;
-	int version = (pBuffer[0] & 0xc0) >> 6;
-	if (version != 2) return E_FAIL;
-	BOOL padding = pBuffer[0] & 0x20;
-	BOOL extension = pBuffer[0] & 0x10;
-	int nCsrc = pBuffer[0] & 0x0f;
-	BOOL marker = pBuffer[1] & 0x80;
-	int payloadType = pBuffer[1] & 0x7f;
-	int sequenceNumber = ntohs(*(u_short*)(pBuffer + 2));
-	u_long timestamp = ntohl(*(u_long*)(pBuffer + 4));
-	u_long ssrc = ntohl(*(u_long*)(pBuffer + 8));
-	cbHeader += nCsrc * 4;
-	if (extension)
+	BYTE bVersion = (pBuffer[0] & 0xc0) >> 6;
+	if (bVersion != 2) return E_FAIL;
+	BOOL hasPadding = pBuffer[0] & 0x20;
+	BOOL hasExtension = pBuffer[0] & 0x10;
+	BYTE nContributingSources = pBuffer[0] & 0x0f;
+	BOOL hasMarker = pBuffer[1] & 0x80;
+	BYTE bPayloadType = pBuffer[1] & 0x7f;
+	u_short iSeqNum = ntohs(*(u_short*)(pBuffer + 2));
+	u_long ulTimestamp = ntohl(*(u_long*)(pBuffer + 4));
+	u_long ulSyncSource = ntohl(*(u_long*)(pBuffer + 8));
+	cbHeader += nContributingSources * 4;
+	if (hasExtension)
 	{
 		cbHeader += 4;
 		if (cbActual < cbHeader) return E_FAIL;
@@ -84,24 +88,27 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 		int cbExtension = ntohs(*(u_short*)(pBuffer + cbHeader - 2));
 		cbHeader += cbExtension;
 	}
-	if (padding)
+	if (hasPadding)
 	{
 		if (cbActual - 1 < cbHeader) return E_FAIL;
 		int padding = pBuffer[cbActual - 1];
 		cbActual -= padding;
 	}
 	if (cbActual < cbHeader) return E_FAIL;
+	cbActual -= cbHeader;
 
 	// Only 16 bit 44.1 kHz stereo supported for now.
-	if (payloadType != 10) return VFW_E_UNSUPPORTED_STREAM;
+	if (bPayloadType != 10) return VFW_E_UNSUPPORTED_STREAM;
 	if (cbActual % 2 > 0) return E_FAIL;
+
+	if (m_nPacketsReceived > 0
+		&& iSeqNum <= m_iPrevSeqNum && iSeqNum + 100 > m_iPrevSeqNum)
+		return S_OK;
 
 	u_short* read = (u_short*)(pBuffer + cbHeader);
 	u_short* write = (u_short*)pBuffer;
-	u_short* end = (u_short*)(pBuffer + cbActual);
+	u_short* end = (u_short*)(pBuffer + cbHeader + cbActual);
 	for (; read < end; read++, write++) *write = ntohs(*read);
-
-	cbActual -= cbHeader;
 
 	hr = pSample->SetActualDataLength(cbActual);
 	if (FAILED(hr)) return hr;
@@ -113,14 +120,15 @@ HRESULT RtpSource::Pin::FillBuffer(IMediaSample* pSample)
 
 	if (m_nPacketsReceived > 0)
 	{
-		REFERENCE_TIME rtEnd = timestamp;
+		REFERENCE_TIME rtEnd = ulTimestamp;
 		hr = pSample->SetTime(&m_rtTime, &rtEnd);
 		if (FAILED(hr)) return hr;
 	}
 
+	m_iPrevSeqNum = iSeqNum;
 	m_llMediaTime = llMediaTimeEnd;
 	m_nPacketsReceived++;
-	m_rtTime = timestamp;
+	m_rtTime = ulTimestamp;
 
 	return S_OK;
 }
@@ -158,7 +166,7 @@ HRESULT RtpSource::Pin::OnThreadStartPlay()
 	if (setsockopt(m_Socket, SOL_SOCKET, SO_REUSEADDR,
 		&reuseaddr, sizeof(reuseaddr))) return E_UNEXPECTED;
 
-	if (bind(m_Socket, (SOCKADDR*)&m_localEP, sizeof(m_localEP)))
+	if (bind(m_Socket, (SOCKADDR*)&m_epLocal, sizeof(m_epLocal)))
 		return E_FAIL;
 
 	m_llMediaTime = 0;

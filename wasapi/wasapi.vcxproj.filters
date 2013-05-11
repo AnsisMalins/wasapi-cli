@@ -47,6 +47,9 @@
     <ClCompile Include="RtpRenderer.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="AudioConverter.cpp">
+      <Filter>DirectShow\Filters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -95,6 +98,9 @@
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
     <ClInclude Include="RtpRenderer.h">
+      <Filter>DirectShow\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioConverter.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
   </ItemGroup>
