@@ -198,6 +198,7 @@
     </ClCompile>
     <ClCompile Include="StdoutRenderer.cpp" />
     <ClCompile Include="WasapiSource.cpp" />
+    <ClCompile Include="WaveFormat.cpp" />
     <ClCompile Include="wexception.cpp" />
     <ClCompile Include="win_exception.cpp" />
   </ItemGroup>
@@ -219,6 +220,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdoutRenderer.h" />
     <ClInclude Include="WasapiSource.h" />
+    <ClInclude Include="WaveFormat.h" />
     <ClInclude Include="wexception.h" />
     <ClInclude Include="win_exception.h" />
   </ItemGroup>

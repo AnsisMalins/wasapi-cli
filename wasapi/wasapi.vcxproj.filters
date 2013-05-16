@@ -50,6 +50,7 @@
     <ClCompile Include="AudioConverter.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="WaveFormat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -103,6 +104,7 @@
     <ClInclude Include="AudioConverter.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
+    <ClInclude Include="WaveFormat.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectShow">
