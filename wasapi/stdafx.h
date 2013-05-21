@@ -1,11 +1,12 @@
 #pragma once
 
+// Windows Vista
 #define _WIN32_WINNT 0x0600
 #define NTDDI_VERSION 0x06000000
 #define WIN32_LEAN_AND_MEAN
 #define WINVER 0x0600
 
-//Base Classes
+// Base Classes
 #include <streams.h>
 
 // COM
@@ -18,6 +19,7 @@
 #include <csignal>
 #include <exception>
 #include <iostream>
+#include <queue>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -31,6 +33,7 @@
 #include <fcntl.h>
 #include <io.h>
 
+// Useful global definitions
 #define _STR(x) #x
 #define STR(x) _STR(x)
 #define STR2WSTR(x) _STR2WSTR(x)

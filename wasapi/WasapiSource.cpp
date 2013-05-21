@@ -4,17 +4,20 @@
 
 using namespace DirectShow;
 
-WasapiSource::WasapiSource(LPCWSTR id, HRESULT* phr) :
+WasapiSource::WasapiSource(HRESULT* phr, LPCWSTR id,
+	AUDCLNT_SHAREMODE shareMode = AUDCLNT_SHAREMODE_SHARED) :
 	CSource(NAME("WasapiSource"), NULL, GUID_NULL, phr),
-	m_Pin(this, id, phr)
+	m_Pin(phr, this, id, shareMode)
 {
 }
 
-WasapiSource::Pin::Pin(CSource* pms, LPCWSTR id, HRESULT* phr) :
+WasapiSource::Pin::Pin(HRESULT* phr, CSource* pms, LPCWSTR id,
+	AUDCLNT_SHAREMODE shareMode) :
 	CSourceStream(NAME("WasapiSource::Pin"), phr, pms, L"1"),
 	m_hBufferReady(NULL),
 	m_Initialized(FALSE),
-	m_rtPrevious(0)
+	m_rtPrevious(0),
+	m_ShareMode(shareMode)
 {
 	if (phr != NULL && FAILED(*phr)) return;
 
@@ -84,11 +87,10 @@ HRESULT WasapiSource::Pin::CheckMediaType(const CMediaType* pMediaType)
 
 	WAVEFORMATEX* pClosestMatch = NULL;
 	HRESULT hr = m_pAudioClient->IsFormatSupported(
-		AUDCLNT_SHAREMODE_SHARED, (WAVEFORMATEX*)pMediaType->Format(),
-		&pClosestMatch);
+		m_ShareMode, (WAVEFORMATEX*)pMediaType->Format(), &pClosestMatch);
 	if (pClosestMatch != NULL) CoTaskMemFree(pClosestMatch);
 
-	return hr == S_OK ? S_OK : E_FAIL;
+	return hr == S_OK ? S_OK : VFW_E_TYPE_NOT_ACCEPTED;
 }
 
 HRESULT WasapiSource::Pin::DecideBufferSize(
@@ -198,7 +200,7 @@ HRESULT WasapiSource::Pin::Initialize()
 	HRESULT hr = m_pAudioClient->GetMixFormat(&pDeviceFormat);
 	if (FAILED(hr)) return hr;
 
-	hr = m_pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
+	hr = m_pAudioClient->Initialize(m_ShareMode,
 		m_eDataFlow == eCapture
 			? AUDCLNT_STREAMFLAGS_EVENTCALLBACK
 			: AUDCLNT_STREAMFLAGS_LOOPBACK,
@@ -218,7 +220,7 @@ HRESULT WasapiSource::Pin::Initialize()
 		hr = m_pEventClient->GetMixFormat(&pDeviceFormat);
 		if (FAILED(hr)) return hr;
 
-		hr = m_pEventClient->Initialize(AUDCLNT_SHAREMODE_SHARED,
+		hr = m_pEventClient->Initialize(m_ShareMode,
 			AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
 			0, 0, pDeviceFormat, NULL);
 		CoTaskMemFree(pDeviceFormat);

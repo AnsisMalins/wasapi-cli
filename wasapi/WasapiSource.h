@@ -3,15 +3,16 @@
 
 namespace DirectShow
 {
-	class WasapiSource : public CSource
+	class WasapiSource : public CSource//, public IAMResourceControl
 	{
 	public:
-		WasapiSource(LPCWSTR id, HRESULT* phr);
+		WasapiSource(HRESULT* phr, LPCWSTR id,
+			AUDCLNT_SHAREMODE shareMode = AUDCLNT_SHAREMODE_SHARED);
 	private:
-		class Pin : public CSourceStream
+		class Pin : public CSourceStream//, public IAMStreamConfig 
 		{
 		public:
-			Pin(CSource* pms, LPCWSTR id, HRESULT* phr);
+			Pin(HRESULT* phr, CSource* pms, LPCWSTR id, AUDCLNT_SHAREMODE shareMode);
 			HRESULT DecideBufferSize(IMemAllocator* pAlloc, ALLOCATOR_PROPERTIES* ppropInputRequest);
 		protected:
 			HRESULT CheckMediaType(const CMediaType* pMediaType);
@@ -29,6 +30,7 @@ namespace DirectShow
 			CComPtr<IAudioCaptureClient> m_pCaptureClient;
 			CComPtr<IAudioClient> m_pEventClient;
 			REFERENCE_TIME m_rtPrevious;
+			AUDCLNT_SHAREMODE m_ShareMode;
 		};
 		Pin m_Pin;
 	};

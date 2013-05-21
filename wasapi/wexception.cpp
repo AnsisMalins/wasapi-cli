@@ -4,8 +4,14 @@
 using namespace std;
 
 wexception::wexception(const wchar_t* message) :
+	_wwhat(message), _what(_wwhat.begin(), _wwhat.end())
+{
+}
+
+wexception::wexception(const wchar_t* message, const wchar_t* context) :
 	_wwhat(message)
 {
+	add_context(context);
 }
 
 void wexception::add_context(const wchar_t* context)
