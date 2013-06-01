@@ -160,6 +160,7 @@ HRESULT WasapiRenderer::ShouldDrawSampleNow(IMediaSample* pMediaSample,
 	return S_OK;
 }
 
+// TODO: Implement jitter buffer and resampler according to http://cgit.freedesktop.org/gstreamer/gst-plugins-good/tree/gst/rtpmanager/rtpjitterbuffer.c starting at line 300.
 DWORD WasapiRenderer::ThreadProc()
 {
 	while (true)
