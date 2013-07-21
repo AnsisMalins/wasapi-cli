@@ -63,8 +63,8 @@ HRESULT WasapiRenderer::Initialize(LPCWSTR pwstrId)
 	return S_OK;
 }
 
-HRESULT WasapiRenderer::Initialize(LPCWSTR pwstrId, const WAVEFORMATEX* pwf,
-	AUDCLNT_SHAREMODE shareMode = AUDCLNT_SHAREMODE_SHARED)
+HRESULT WasapiRenderer::Initialize(
+	LPCWSTR pwstrId, const WAVEFORMATEX* pwf, AUDCLNT_SHAREMODE shareMode)
 {
 	if (pwstrId == NULL || pwf == NULL) return E_POINTER;
 	if (m_pAudioClient != NULL) return VFW_E_WRONG_STATE;
@@ -74,7 +74,7 @@ HRESULT WasapiRenderer::Initialize(LPCWSTR pwstrId, const WAVEFORMATEX* pwf,
 	HRESULT hr = Activate(pwstrId);
 	if (FAILED(hr)) return hr;
 
-	HRESULT hr = IsFormatSupported(pwf);
+	hr = IsFormatSupported(pwf);
 	if (FAILED(hr)) return hr;
 
 	m_pFormat = wfcpy(pwf);
@@ -160,7 +160,9 @@ HRESULT WasapiRenderer::ShouldDrawSampleNow(IMediaSample* pMediaSample,
 	return S_OK;
 }
 
-// TODO: Implement jitter buffer and resampler according to http://cgit.freedesktop.org/gstreamer/gst-plugins-good/tree/gst/rtpmanager/rtpjitterbuffer.c starting at line 300.
+/* TODO: Implement jitter buffer and resampler according to
+http://cgit.freedesktop.org/gstreamer/gst-plugins-good/tree/gst/rtpmanager/rtpjitterbuffer.c
+starting at line 300. */
 DWORD WasapiRenderer::ThreadProc()
 {
 	while (true)

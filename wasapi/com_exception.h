@@ -6,7 +6,7 @@ namespace COM
 	class com_exception : public wexception
 	{
 	public:
-		com_exception(const wchar_t*, HRESULT hr);
+		com_exception(const wchar_t* message, HRESULT hr);
 		HRESULT hr() const;
 	private:
 		HRESULT _hr;

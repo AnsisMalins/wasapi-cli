@@ -4,7 +4,7 @@
 using namespace std;
 
 wexception::wexception(const wchar_t* message) :
-	_wwhat(message), _what(_wwhat.begin(), _wwhat.end())
+	_wwhat(message)//, _what(_wwhat.begin(), _wwhat.end())
 {
 }
 

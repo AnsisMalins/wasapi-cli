@@ -5,8 +5,18 @@ using namespace DirectShow;
 
 RtpRenderer::RtpRenderer(IN_ADDR localIP, SOCKADDR_IN remoteEP, HRESULT* phr) :
 	CBaseRenderer(GUID_NULL, NAME("RtpRenderer"), NULL, phr),
+	m_LocalIP(localIP),
+	m_RemoteEP(remoteEP),
 	m_Ssid(rand())
 {
+	if (phr != NULL && FAILED(*phr)) return;
+
+	WSADATA wsadata;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata))
+	{
+		if (phr != NULL) *phr = E_UNEXPECTED;
+		return;
+	}
 }
 
 HRESULT RtpRenderer::CheckMediaType(const CMediaType* pMediaType)
@@ -33,22 +43,34 @@ HRESULT RtpRenderer::DoRenderSample(IMediaSample* pMediaSample)
 	if (FAILED(hr)) return hr;
 
 	long cbActual = pMediaSample->GetActualDataLength();
+	if (cbActual + 12 > pMediaSample->GetSize()) return E_FAIL;
 
 	u_short* read = (u_short*)(pBuffer + cbActual - 2);
 	u_short* write = (u_short*)(pBuffer + cbActual - 2 + 12);
 	u_short* begin = (u_short*)pBuffer;
 	for (; read >= begin; read--, write--) *write = htons(*read);
+	cbActual += 12;
 
 	REFERENCE_TIME rtTime;
 	hr = pMediaSample->GetTime(NULL, &rtTime);
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) hr = pMediaSample->GetMediaTime(NULL, &rtTime);
+	if (FAILED(hr)) rtTime = m_nPacketsSent;
 
-	*(u_short*)pBuffer = 0x800a;
-	*(u_short*)(pBuffer + 2) = htons(m_nPacketsSent);
-	*(u_long*)(pBuffer + 4) = htonl((u_long)rtTime);
-	*(u_long*)(pBuffer + 8) = m_Ssid;
+	while (cbActual > 12)
+	{
+		*(u_short*)pBuffer = htons(0x800a);
+		*(u_short*)(pBuffer + 2) = htons(m_nPacketsSent);
+		*(u_long*)(pBuffer + 4) = htonl((u_long)rtTime);
+		*(u_long*)(pBuffer + 8) = htonl(m_Ssid);
 
-	m_nPacketsSent++;
+		int cbSent = sendto(m_Socket, (char*)pBuffer, min(cbActual, 1472), 0,
+			(SOCKADDR*)&m_RemoteEP, sizeof(m_RemoteEP));
+		if (cbSent == SOCKET_ERROR || cbSent < 12) return E_FAIL;
+		pBuffer += cbSent - 12;
+		cbActual -= cbSent - 12;
+
+		m_nPacketsSent++;
+	}
 
 	return S_OK;
 }

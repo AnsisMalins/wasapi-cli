@@ -185,7 +185,7 @@ HRESULT AudioConverter::Transform(IMediaSample* pIn, IMediaSample* pOut)
 		}
 	}
 
-	pOut->SetActualDataLength(pbWrite - pbOut);
+	pOut->SetActualDataLength((long)(pbWrite - pbOut));
 
 	return S_OK;
 }

@@ -16,6 +16,7 @@ int wfcmp(const WAVEFORMATEX* pwf1, const WAVEFORMATEX* pwf2)
 		else if (pwf2 == NULL) return 1;
 		else return 0;
 	}
+
 	WAVEFORMATEX* pwfe1 = NULL;
 	WAVEFORMATEX* pwfe2 = NULL;
 	if (pwf1->wFormatTag == WAVE_FORMAT_EXTENSIBLE

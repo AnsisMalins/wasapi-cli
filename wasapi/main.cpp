@@ -8,6 +8,11 @@
 #include "RtpSource.h"
 #include "StdoutRenderer.h"
 #include "WasapiSource.h"
+#include "waveformatex.h"
+
+#ifdef _DEBUG
+#define DEBUG
+#endif
 
 using namespace COM;
 using namespace DirectShow;
@@ -19,8 +24,6 @@ void Main(const vector<wstring>& args);
 wstring next_arg(const vector<wstring>& args,
 	vector<wstring>::const_iterator& arg);
 void on_sigint(int sig);
-WAVEFORMATEX wavefmt(WORD wFormatTag, WORD nChannels,
-	DWORD nSamplesPerSec, WORD wBitsPerSample);
 
 HANDLE hSigint;
 
@@ -34,7 +37,6 @@ void Main(const vector<wstring>& args)
 	Graph graph(CLSID_FilterGraph, true);
 
 	vector<wstring>::const_iterator arg = args.begin();
-	++arg;
 
 	if (arg == args.end() || *arg == L"/?" || *arg == L"--help")
 	{
@@ -83,11 +85,12 @@ void Main(const vector<wstring>& args)
 		{
 			wstring formatStr = next_arg(args, arg);
 			if (formatStr == L"!") throw invalid_argument("audioconvert needs format");
-			WAVEFORMATEX format;
-			if (formatStr == L"s16le") format = wavefmt(WAVE_FORMAT_PCM, 2, 44100, 16);
+			WAVEFORMATEX* format;
+			if (formatStr == L"s16le") format = wfinit(WAVE_FORMAT_PCM, 2, 16, 44100);
 			else throw invalid_argument("audioconvert: format not supported");
 			HRESULT hr = S_OK;
-			CComPtr<AudioConverter> audioconvert = new AudioConverter(format, &hr);
+			CComPtr<AudioConverter> audioconvert = new AudioConverter(*format, &hr);
+			CoTaskMemFree(format);
 			EX(hr);
 			newFilter = Filter(audioconvert);
 			filterName = L"audioconvert";
@@ -201,7 +204,7 @@ void Main(const vector<wstring>& args)
 				id = wasapi.GetDefaultDevice(dataFlow, role).GetId();
 			}
 			HRESULT hr = S_OK;
-			newFilter = Filter(new WasapiSource(id.c_str(), &hr));
+			newFilter = Filter(new WasapiSource(&hr, id.c_str()));
 			EX(hr);
 			filterName = L"wasapisrc";
 		}
@@ -227,7 +230,18 @@ void Main(const vector<wstring>& args)
 		{
 			graph.AddFilter(newFilter, filterName);
 			if (curFilter != NULL)
-				graph.ConnectDirect(curFilter.Out(0), newFilter.In(0));
+			{
+				try
+				{
+					graph.ConnectDirect(curFilter.Out(0), newFilter.In(0));
+				}
+				catch (wexception& ex)
+				{
+					ex.add_context(CONTEXTW);
+					ex.add_context(graph.ToString().c_str());
+					throw;
+				}
+			}
 		}
 		curFilter = newFilter;
 		next_arg(args, arg);
@@ -267,12 +281,10 @@ int wmain(int argc, wchar_t** argv)
 	try
 	{
 		vector<wstring> args;
-		args.reserve(argc);
-#ifdef _DEBUG
-		args.push_back(wstring(L""));
-
+		args.reserve(argc - 1);
+#ifdef DEBUG
 		args.push_back(wstring(L"wasapisrc"));
-		args.push_back(wstring(L"eCapture"));
+		args.push_back(wstring(L"eRender"));
 
 		args.push_back(wstring(L"!"));
 
@@ -282,15 +294,23 @@ int wmain(int argc, wchar_t** argv)
 		args.push_back(wstring(L"!"));
 
 		args.push_back(wstring(L"rtpsink"));
-		args.push_back(wstring(L"127.0.0.1"));
-		args.push_back(wstring(L"127.0.0.1"));
+		args.push_back(wstring(L"192.168.2.108"));
+		args.push_back(wstring(L"192.168.2.105"));
+		args.push_back(wstring(L"5004"));
+
+		/*args.push_back(wstring(L"rtpsrc"));
+		args.push_back(wstring(L"192.168.2.108"));
 		args.push_back(wstring(L"5004"));
 
 		args.push_back(wstring(L"!"));
-		args.push_back(wstring(L"print"));
+
+		args.push_back(wstring(L"wasapisink"));*/
+
+		//args.push_back(wstring(L"!"));
+		//args.push_back(wstring(L"print"));
 
 #else
-		for (int i = 0; i < argc; i++) args.push_back(wstring(argv[i]));
+		for (int i = 1; i < argc; i++) args.push_back(wstring(argv[i]));
 #endif
 		Main(args);
 	}
@@ -304,22 +324,9 @@ int wmain(int argc, wchar_t** argv)
 		wcerr << ex.what() << endl;
 		result = 1;
 	}
-#ifdef _DEBUG
+#ifdef DEBUG
+	wcerr << "END" << endl;
 	WaitForSingleObject(hSigint, INFINITE);
 #endif
 	return result;
-}
-
-WAVEFORMATEX wavefmt(WORD wFormatTag, WORD nChannels,
-	DWORD nSamplesPerSec, WORD wBitsPerSample)
-{
-	WAVEFORMATEX wf;
-	wf.wFormatTag = wFormatTag;
-	wf.nChannels = nChannels;
-	wf.nSamplesPerSec = nSamplesPerSec;
-	wf.wBitsPerSample = wBitsPerSample;
-	wf.nBlockAlign = wBitsPerSample / 8 * nChannels;
-	wf.nAvgBytesPerSec = wf.nBlockAlign * nSamplesPerSec;
-	wf.cbSize = 0;
-	return wf;
 }

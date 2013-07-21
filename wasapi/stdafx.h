@@ -1,9 +1,11 @@
 #pragma once
 
+// Faster compilation
+#define WIN32_LEAN_AND_MEAN
+
 // Windows Vista
 #define _WIN32_WINNT 0x0600
 #define NTDDI_VERSION 0x06000000
-#define WIN32_LEAN_AND_MEAN
 #define WINVER 0x0600
 
 // Base Classes

@@ -4,8 +4,8 @@
 
 using namespace DirectShow;
 
-WasapiSource::WasapiSource(HRESULT* phr, LPCWSTR id,
-	AUDCLNT_SHAREMODE shareMode = AUDCLNT_SHAREMODE_SHARED) :
+WasapiSource::WasapiSource(
+	HRESULT* phr, LPCWSTR id, AUDCLNT_SHAREMODE shareMode) :
 	CSource(NAME("WasapiSource"), NULL, GUID_NULL, phr),
 	m_Pin(phr, this, id, shareMode)
 {
