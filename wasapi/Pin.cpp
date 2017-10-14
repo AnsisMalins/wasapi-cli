@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "Pin.h"
-#include "com_exception.h"
+#include "COMException.h"
 
-using namespace COM;
+#define EX(errorCode) Check((errorCode), __FILE__, __LINE__)
+
 using namespace DirectShow;
 using namespace std;
 

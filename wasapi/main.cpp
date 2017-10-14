@@ -1,20 +1,17 @@
 #include "stdafx.h"
 #include "AudioConverter.h"
-#include "com_exception.h"
+#include "COMException.h"
 #include "CoInitializer.h"
 #include "DeviceEnumerator.h"
+#include "Encoding.h"
 #include "Graph.h"
 #include "RtpRenderer.h"
 #include "RtpSource.h"
 #include "StdoutRenderer.h"
 #include "WasapiSource.h"
 #include "waveformatex.h"
+#include "Win32Exception.h"
 
-#ifdef _DEBUG
-#define DEBUG
-#endif
-
-using namespace COM;
 using namespace DirectShow;
 using namespace std;
 using namespace WASAPI;
@@ -25,14 +22,66 @@ wstring next_arg(const vector<wstring>& args,
 	vector<wstring>::const_iterator& arg);
 void on_sigint(int sig);
 
-HANDLE hSigint;
+HANDLE g_hSigint;
+
+struct FilterConfig
+{
+    wstring name;
+    map<wstring, wstring> params;
+};
+
+vector<FilterConfig> ParseArgs(const vector<wstring>& args)
+{
+    size_t i = 0;
+    vector<FilterConfig> ret;
+
+    while (i < args.size())
+    {
+        const wstring& arg = args[i];
+        assert(arg.length() > 0);
+        if (arg[0] != L'-')
+            break;
+        i++;
+    }
+
+    while (i < args.size())
+    {
+        FilterConfig config;
+        config.name = args[i];
+        i++;
+        while (i < args.size() && args[i] != L"!")
+        {
+            const wstring& arg = args[i];
+
+            size_t eq = arg.find(L'=');
+            if (eq < 0)
+            {
+                ostringstream s;
+                s << "Expected <key>=<value>, got '" << WideCharToUTF8(arg) << "' in " __FILE__ ":" << __LINE__;
+                throw invalid_argument(s.str());
+            }
+                
+            // TODO
+
+            wstring key = arg.substr(0, eq);
+            wstring value = arg.substr(eq + 1);
+            config.params.insert(make_pair(key, value));
+            i++;
+        }
+        ret.push_back(config);
+        i++;
+    }
+
+    return ret;
+}
 
 void Main(const vector<wstring>& args)
 {
-	hSigint = CreateEvent(NULL, TRUE, FALSE, NULL);
+	g_hSigint = CreateEvent(NULL, TRUE, FALSE, NULL);
+    assert(g_hSigint != nullptr);
 	signal(SIGINT, on_sigint);
 
-	CoInitializer coinit(COINIT_MULTITHREADED);
+	CoInitializer coInit(COINIT_MULTITHREADED);
 
 	Graph graph(CLSID_FilterGraph, true);
 
@@ -91,13 +140,15 @@ void Main(const vector<wstring>& args)
 			HRESULT hr = S_OK;
 			CComPtr<AudioConverter> audioconvert = new AudioConverter(*format, &hr);
 			CoTaskMemFree(format);
-			EX(hr);
+			Check(hr, __FILE__, __LINE__);
 			newFilter = Filter(audioconvert);
 			filterName = L"audioconvert";
 		}
 		else if (*arg == L"filesink")
 		{
-			throw invalid_argument("filesink is not implemented yet\n" CONTEXT);
+            ostringstream s;
+            s << "filesink is not implemented yet in " __FILE__ ":" << __LINE__;
+            throw invalid_argument(s.str());
 		}
 		else if (*arg == L"filesrc")
 		{
@@ -135,7 +186,7 @@ void Main(const vector<wstring>& args)
 			SOCKADDR_IN remoteEP = { AF_INET, htons(remotePort), remoteIP };
 			HRESULT hr = S_OK;
 			CComPtr<RtpRenderer> rtpsink = new RtpRenderer(localIP, remoteEP, &hr);
-			EX(hr);
+			Check(hr, __FILE__, __LINE__);
 			newFilter = Filter(rtpsink);
 			filterName = L"rtpsink";
 		}
@@ -152,7 +203,7 @@ void Main(const vector<wstring>& args)
 			localEP.sin_port = htons(_wtoi(portwstr.c_str()));
 			HRESULT hr = S_OK;
 			CComPtr<RtpSource> rtpsrc = new RtpSource(localEP, &hr);
-			EX(hr);
+			Check(hr, __FILE__, __LINE__);
 			newFilter = Filter(rtpsrc);
 			filterName = L"rtpsrc";
 		}
@@ -160,12 +211,14 @@ void Main(const vector<wstring>& args)
 		{
 			HRESULT hr = S_OK;
 			newFilter = Filter(new StdoutRenderer(&hr));
-			EX(hr);
+			Check(hr, __FILE__, __LINE__);
 			filterName = L"stdsink";
 		}
 		else if (*arg == L"stdsrc")
 		{
-			throw invalid_argument("stdsrc is not implemented yet\n" CONTEXT);
+            ostringstream s;
+            s << "stdsrc is not implemented yet in " __FILE__ ":" << __LINE__;
+            throw invalid_argument(s.str());
 		}
 		else if (*arg == L"wasapisink")
 		{
@@ -198,22 +251,26 @@ void Main(const vector<wstring>& args)
 				if (id == L"eCommunications") role = eCommunications;
 				else if (id == L"eConsole" || id == L"!") role = eConsole;
 				else if (id == L"eMultimedia") role = eMultimedia;
-				else throw invalid_argument("wasapisrc: Invalid ERole\n" CONTEXT);
+                else
+                {
+                    ostringstream s;
+                    s << "wasapisrc: Invalid ERole in " __FILE__ ":" << __LINE__;
+                    throw invalid_argument(s.str());
+                }
 				DeviceEnumerator wasapi;
 				Device device;
 				id = wasapi.GetDefaultDevice(dataFlow, role).GetId();
 			}
 			HRESULT hr = S_OK;
 			newFilter = Filter(new WasapiSource(&hr, id.c_str()));
-			EX(hr);
+			Check(hr, __FILE__, __LINE__);
 			filterName = L"wasapisrc";
 		}
 		else
 		{
-			wostringstream str;
-			str << "unknown command: " << *arg << "\n" CONTEXT;
-			wstring what = str.str();
-			throw invalid_argument(string(what.begin(), what.end()));
+			ostringstream s;
+            s << "unknown command: '" << WideCharToUTF8(*arg) << "' in " __FILE__ ":" << __LINE__;
+            throw invalid_argument(s.str());
 		}
 
 		if (newFilter != NULL && arg != args.end() && *arg != L"!")
@@ -222,26 +279,19 @@ void Main(const vector<wstring>& args)
 			if (tmp != L"!")
 			{
 				filterName = next_arg(args, arg);
-				if (next_arg(args, arg) != L"!")
-					throw invalid_argument("\"!\" expected\n" CONTEXT);
+                if (next_arg(args, arg) != L"!")
+                {
+                    ostringstream s;
+                    s << "Expected '!', got '" << WideCharToUTF8(tmp) << "' in " __FILE__ ":" << __LINE__;
+                    throw invalid_argument(s.str());
+                }
 			}
 		}
 		if (newFilter != NULL)
 		{
 			graph.AddFilter(newFilter, filterName);
 			if (curFilter != NULL)
-			{
-				try
-				{
-					graph.ConnectDirect(curFilter.Out(0), newFilter.In(0));
-				}
-				catch (wexception& ex)
-				{
-					ex.add_context(CONTEXTW);
-					ex.add_context(graph.ToString().c_str());
-					throw;
-				}
-			}
+				graph.ConnectDirect(curFilter.Out(0), newFilter.In(0));
 		}
 		curFilter = newFilter;
 		next_arg(args, arg);
@@ -261,15 +311,12 @@ wstring next_arg(const vector<wstring>& args,
 
 void on_sigint(int sigint)
 {
-	if (!SetEvent(hSigint))
-	{
-		//INVALID_HANDLE_VALUE
-	}
+    assert(SetEvent(g_hSigint));
 }
 
 void WaitForCompletion(Graph& graph)
 {
-	HANDLE h[] = { hSigint, graph.GetEventHandle() };
+	HANDLE h[] = { g_hSigint, graph.GetEventHandle() };
 	DWORD n = sizeof(h) / sizeof(HANDLE);
 	while (WaitForMultipleObjects(n, h, FALSE, INFINITE) != 0
 		&& graph.GetEvent() != EC_COMPLETE) ;
@@ -277,56 +324,65 @@ void WaitForCompletion(Graph& graph)
 
 int wmain(int argc, wchar_t** argv)
 {
-	int result = 0;
-	try
+	int status = 0;
+
+    try
 	{
 		vector<wstring> args;
 		args.reserve(argc - 1);
 #ifdef DEBUG
-		args.push_back(wstring(L"wasapisrc"));
-		args.push_back(wstring(L"eRender"));
+		args.push_back(L"wasapisrc");
+		args.push_back(L"eRender");
 
-		args.push_back(wstring(L"!"));
+		args.push_back(L"!");
 
-		args.push_back(wstring(L"audioconvert"));
-		args.push_back(wstring(L"s16le"));
+		args.push_back(L"audioconvert");
+		args.push_back(L"s16le");
 
-		args.push_back(wstring(L"!"));
+		args.push_back(L"!");
 
-		args.push_back(wstring(L"rtpsink"));
-		args.push_back(wstring(L"192.168.2.108"));
-		args.push_back(wstring(L"192.168.2.105"));
-		args.push_back(wstring(L"5004"));
+		args.push_back(L"rtpsink");
+		args.push_back(L"192.168.2.108");
+		args.push_back(L"192.168.2.105");
+		args.push_back(L"5004");
 
-		/*args.push_back(wstring(L"rtpsrc"));
-		args.push_back(wstring(L"192.168.2.108"));
-		args.push_back(wstring(L"5004"));
+		/*args.push_back(L"rtpsrc");
+		args.push_back(L"192.168.2.108");
+		args.push_back(L"5004");
 
-		args.push_back(wstring(L"!"));
+		args.push_back(L"!");
 
-		args.push_back(wstring(L"wasapisink"));*/
+		args.push_back(L"wasapisink");*/
 
-		//args.push_back(wstring(L"!"));
-		//args.push_back(wstring(L"print"));
+		//args.push_back(L"!");
+		//args.push_back(L"print");
 
 #else
-		for (int i = 1; i < argc; i++) args.push_back(wstring(argv[i]));
+		for (int i = 1; i < argc; i++)
+            args.push_back(wstring(argv[i]));
 #endif
 		Main(args);
 	}
-	catch (const com_exception& ex)
+	catch (const COMException& ex)
 	{
-		wcerr << ex.what() << endl;
-		result = ex.hr();
+		wcerr << UTF8ToWideCharNoExcept(ex.what()) << endl;
+		status = ex.ErrorCode();
 	}
+    catch (const Win32Exception& ex)
+    {
+        wcerr << UTF8ToWideCharNoExcept(ex.what()) << endl;
+        status = ex.ErrorCode();
+    }
 	catch (const exception& ex)
 	{
-		wcerr << ex.what() << endl;
-		result = 1;
+		wcerr << UTF8ToWideCharNoExcept(ex.what()) << endl;
+		status = 1;
 	}
+
 #ifdef DEBUG
 	wcerr << "END" << endl;
-	WaitForSingleObject(hSigint, INFINITE);
+	WaitForSingleObject(g_hSigint, INFINITE);
 #endif
-	return result;
+
+    return status;
 }

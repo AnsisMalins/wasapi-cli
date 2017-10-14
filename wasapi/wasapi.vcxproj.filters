@@ -30,17 +30,9 @@
     <ClCompile Include="StdoutRenderer.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="AudioClient.cpp">
-      <Filter>WASAPI</Filter>
-    </ClCompile>
     <ClCompile Include="WasapiSource.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="com_exception.cpp">
-      <Filter>COM</Filter>
-    </ClCompile>
-    <ClCompile Include="wexception.cpp" />
-    <ClCompile Include="win_exception.cpp" />
     <ClCompile Include="RtpSource.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
@@ -54,7 +46,11 @@
     <ClCompile Include="WasapiRenderer.cpp">
       <Filter>DirectShow\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="sock_exception.cpp" />
+    <ClCompile Include="Encoding.cpp" />
+    <ClCompile Include="Win32Exception.cpp" />
+    <ClCompile Include="COMException.cpp">
+      <Filter>COM</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -85,17 +81,9 @@
     <ClInclude Include="StdoutRenderer.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="AudioClient.h">
-      <Filter>WASAPI</Filter>
-    </ClInclude>
     <ClInclude Include="WasapiSource.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="com_exception.h">
-      <Filter>COM</Filter>
-    </ClInclude>
-    <ClInclude Include="wexception.h" />
-    <ClInclude Include="win_exception.h" />
     <ClInclude Include="com_iterator.h">
       <Filter>COM</Filter>
     </ClInclude>
@@ -112,7 +100,11 @@
     <ClInclude Include="WasapiRenderer.h">
       <Filter>DirectShow\Filters</Filter>
     </ClInclude>
-    <ClInclude Include="sock_exception.h" />
+    <ClInclude Include="Encoding.h" />
+    <ClInclude Include="Win32Exception.h" />
+    <ClInclude Include="COMException.h">
+      <Filter>COM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="DirectShow">

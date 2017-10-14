@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "Filter.h"
-#include "com_exception.h"
+#include "COMException.h"
 
-using namespace COM;
+#define EX(errorCode) Check((errorCode), __FILE__, __LINE__)
+
 using namespace DirectShow;
 using namespace std;
 
@@ -57,16 +58,24 @@ Pin Filter::In(unsigned int index)
 {
 	++index;
 	for (iterator i = begin(); i != end(); ++i)
-		if (i->QueryDirection() == PINDIR_INPUT && --index == 0) return *i;
-	throw out_of_range("Filter::In out of range.\n" CONTEXT);
+		if (i->QueryDirection() == PINDIR_INPUT && --index == 0)
+            return *i;
+
+    ostringstream s;
+    s << "Filter::In out of range in " << __FILE__ << ":" << __LINE__;
+    throw out_of_range(s.str());
 }
 
 Pin Filter::Out(unsigned int index)
 {
 	++index;
 	for (iterator i = begin(); i != end(); ++i)
-		if (i->QueryDirection() == PINDIR_OUTPUT && --index == 0) return *i;
-	throw out_of_range("Filter::Out out of range.\n" CONTEXT);
+		if (i->QueryDirection() == PINDIR_OUTPUT && --index == 0)
+            return *i;
+
+    ostringstream s;
+    s << "Filter::Out out of range in " << __FILE__ << ":" << __LINE__;
+    throw out_of_range(s.str());
 }
 
 Pin Filter::FindPin(const wstring& name)

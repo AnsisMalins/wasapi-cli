@@ -22,29 +22,30 @@
     <ProjectGuid>{54ECEBEF-0318-41B6-8B58-0B742AF1CDE9}</ProjectGuid>
     <RootNamespace>wasapi</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>Windows7.1SDK</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -176,12 +177,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AudioClient.cpp" />
     <ClCompile Include="AudioConverter.cpp" />
     <ClCompile Include="DeviceCollection.cpp" />
+    <ClCompile Include="Encoding.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="CoInitializer.cpp" />
-    <ClCompile Include="com_exception.cpp" />
+    <ClCompile Include="COMException.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="DeviceEnumerator.cpp" />
     <ClCompile Include="Graph.cpp" />
@@ -190,7 +191,6 @@
     <ClCompile Include="PropertyStore.cpp" />
     <ClCompile Include="RtpRenderer.cpp" />
     <ClCompile Include="RtpSource.cpp" />
-    <ClCompile Include="sock_exception.cpp" />
     <ClCompile Include="waveformatex.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -201,17 +201,16 @@
     <ClCompile Include="StdoutRenderer.cpp" />
     <ClCompile Include="WasapiRenderer.cpp" />
     <ClCompile Include="WasapiSource.cpp" />
-    <ClCompile Include="wexception.cpp" />
-    <ClCompile Include="win_exception.cpp" />
+    <ClCompile Include="Win32Exception.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AudioClient.h" />
     <ClInclude Include="AudioConverter.h" />
     <ClInclude Include="com_iterator.h" />
     <ClInclude Include="DeviceCollection.h" />
+    <ClInclude Include="Encoding.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="CoInitializer.h" />
-    <ClInclude Include="com_exception.h" />
+    <ClInclude Include="COMException.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceEnumerator.h" />
     <ClInclude Include="Graph.h" />
@@ -219,14 +218,12 @@
     <ClInclude Include="PropertyStore.h" />
     <ClInclude Include="RtpRenderer.h" />
     <ClInclude Include="RtpSource.h" />
-    <ClInclude Include="sock_exception.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdoutRenderer.h" />
     <ClInclude Include="WasapiRenderer.h" />
     <ClInclude Include="WasapiSource.h" />
     <ClInclude Include="waveformatex.h" />
-    <ClInclude Include="wexception.h" />
-    <ClInclude Include="win_exception.h" />
+    <ClInclude Include="Win32Exception.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\baseclasses\baseclasses.vcxproj">

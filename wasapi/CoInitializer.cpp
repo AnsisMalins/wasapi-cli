@@ -1,16 +1,10 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "CoInitializer.h"
-#include "com_exception.h"
-
-using namespace COM;
+#include "COMException.h"
 
 CoInitializer::CoInitializer(DWORD dwCoInit)
 {
-	EX(CoInitializeEx(NULL, dwCoInit));
-}
-
-CoInitializer::CoInitializer(const CoInitializer& co)
-{
+	Check(CoInitializeEx(NULL, dwCoInit), __FILE__, __LINE__);
 }
 
 CoInitializer::~CoInitializer()

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "DeviceCollection.h"
-#include "com_exception.h"
+#include "COMException.h"
+
+#define EX(errorCode) Check((errorCode), __FILE__, __LINE__)
 
 using namespace COM;
 using namespace WASAPI;

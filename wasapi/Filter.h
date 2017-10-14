@@ -7,7 +7,7 @@ namespace DirectShow
 	class Filter
 	{
 	public:
-		typedef COM::com_iterator<Pin, IPin, IEnumPins> iterator;
+		typedef com_iterator<Pin, IPin, IEnumPins> iterator;
 		Filter();
 		Filter(const IID& clsid);
 		Filter(LPCOLESTR clsid);

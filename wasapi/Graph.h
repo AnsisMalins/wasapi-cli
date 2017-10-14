@@ -7,7 +7,7 @@ namespace DirectShow
 	class Graph
 	{
 	public:
-		typedef COM::com_iterator<Filter, IBaseFilter, IEnumFilters> iterator;
+		typedef com_iterator<Filter, IBaseFilter, IEnumFilters> iterator;
 		Graph(const IID& clsid, bool addToRot);
 		~Graph();
 		void Abort();
